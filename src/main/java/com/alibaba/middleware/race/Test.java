@@ -1,6 +1,6 @@
 package com.alibaba.middleware.race;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -9,6 +9,7 @@ import java.util.List;
  * Created by hahong on 2016/7/19.
  */
 public class Test {
+
     public static void main(String args[]) throws IOException, InterruptedException {
         long startTime = System.currentTimeMillis();
         String folder = "D:\\middleware-data\\prerun_data\\prerun_data\\";
