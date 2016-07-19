@@ -20,12 +20,15 @@ public class TestByCaseFile {
     public static void checkResult(String str, OrderSystem.Result r) {
         Pattern pattern = Pattern.compile("orderid:(\\d+)");
         Matcher matcher = pattern.matcher(str);
+        matcher.find();
+        System.out.println(str);
         long orderId = Long.parseLong(matcher.group(1));
         if (r.orderId() != orderId) {
             System.err.printf("Error, key: %s, expected value: %d, actural value: %d\n", "orderid", orderId, r.orderId());
         }
-        pattern = Pattern.compile("KV:[(.*)]");
+        pattern = Pattern.compile("KV:\\[(.*)\\]");
         matcher = pattern.matcher(str);
+        matcher.find();
         String kvStr = matcher.group(1);
         String[] kvs = kvStr.split(",");
         for (String kv : kvs) {
@@ -33,8 +36,8 @@ public class TestByCaseFile {
             if (t.equals("")) continue;
             String[] tp = t.split(":");
             String k = tp[0], v = tp[1];
-            if (!r.get(k).equals(v)) {
-                System.err.printf("Error, key: %s, expected value: %s, actural value: %s\n", k, v, r.get(k));
+            if (!r.get(k).valueAsString().replace("+", "").equals(v)) {
+                System.err.printf("Error, key: %s, expected value: %s, actural value: %s\n", k, v, r.get(k).valueAsString());
             }
         }
     }
@@ -49,13 +52,19 @@ public class TestByCaseFile {
         OrderSystemImpl osi = new OrderSystemImpl();
 
         osi.construct(orderFiles, buyerFiles, goodFiles, storeFolders);
-
+        int cnt = 0;
         String filename = "D:\\middleware-data\\prerun_data\\prerun_data\\case.0";
         try {
+
             FileInputStream fis = new FileInputStream(filename);
             BufferedReader br = new BufferedReader(new InputStreamReader(fis, StandardCharsets.UTF_8));
             while (true) {
+                ++cnt;
+                if (cnt == 13) {
+                    int aaa = 1;
+                }
                 String cs = br.readLine();
+                if (cs == null) break;
                 if (cs.contains("QUERY_ORDER")) {
                     long orderid = Long.parseLong(br.readLine().replace("ORDERID:", ""));
                     String[] keys = getKeys(br.readLine());
@@ -63,8 +72,8 @@ public class TestByCaseFile {
                     br.readLine();
                     while (true) {
                         String t = br.readLine();
-                        checkResult(t, r);
                         if (t.equals("}")) break;
+                        checkResult(t, r);
                     }
                     br.readLine();
                 } else if (cs.contains("QUERY_BUYER_TSRANGE")) {
@@ -72,11 +81,12 @@ public class TestByCaseFile {
                     long startTime = Long.parseLong(br.readLine().replace("STARTTIME:", ""));
                     long endTime = Long.parseLong(br.readLine().replace("ENDTIME:", ""));
                     Iterator<OrderSystem.Result> r = osi.queryOrdersByBuyer(startTime, endTime, buyerid);
+                    String t = br.readLine();
                     while (true) {
-                        OrderSystem.Result sr = r.next();
-                        String t = br.readLine();
-                        checkResult(t, sr);
+                        t = br.readLine();
                         if (t.equals("}")) break;
+                        OrderSystem.Result sr = r.next();
+                        checkResult(t, sr);
                     }
                     if (r.hasNext()) {
                         System.err.println("Error, extra result found.");
@@ -89,20 +99,30 @@ public class TestByCaseFile {
                     Iterator<OrderSystem.Result> r = osi.queryOrdersBySaler(salerid, goodid, Arrays.asList(keys));
                     br.readLine();
                     while (true) {
-                        OrderSystem.Result sr = r.next();
                         String t = br.readLine();
-                        checkResult(t, sr);
                         if (t.equals("}")) break;
+                        OrderSystem.Result sr = r.next();
+                        checkResult(t, sr);
                     }
                     if (r.hasNext()) {
                         System.err.println("Error, extra result found.");
                     }
                     br.readLine();
                 } else {
-
+                    String goodid = br.readLine().replace("GOODID:", "");
+                    String[] keys = getKeys(br.readLine());
+                    String r = osi.sumOrdersByGood(goodid, keys[0]).valueAsString();
+                    String sr = br.readLine().replace("RESULT:", "");
+                    double dr = Double.parseDouble(r), dsr = Double.parseDouble(sr);
+                    if (Math.abs(dr - dsr) > 0.0001) {
+                        System.err.printf("Error when calculating sum, expected value: %f, actural value: %f.\n", dsr, dr);
+                    }
+                    br.readLine();
                 }
-                br.readLine();
+
+                System.out.printf("Test case %d complete.\n", cnt);
             }
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

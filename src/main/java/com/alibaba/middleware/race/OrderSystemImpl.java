@@ -599,11 +599,15 @@ public class OrderSystemImpl implements OrderSystem {
     public Iterator<Result> queryOrdersByBuyer(long startTime, long endTime, String buyerid) {
         synchronized (this) {
             List<String> ans = QueryOrderByBuyer(Utils.hash(buyerid), startTime, endTime, orderBuyerIndexOffset, sortedOrderBuyerIndexBlockFiles);
+            Map<String, String> buyerInfo = Utils.ParseEntryStrToMap(QueryBuyerByBuyer(buyerid));
 
             if (ans.isEmpty()) return null;
             List<Result> rr = new ArrayList<>();
             for (String r : ans) {
                 Map<String, String> ls = Utils.ParseEntryStrToMap(r);
+                Map<String, String> goodInfo = Utils.ParseEntryStrToMap(QueryGoodByGood(ls.get("goodid")));
+                ls.putAll(buyerInfo);
+                ls.putAll(goodInfo);
                 rr.add(new QueryResult(ls));
             }
             Collections.sort(rr, new Comparator<Result>() {
