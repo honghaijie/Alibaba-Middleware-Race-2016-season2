@@ -1,4 +1,6 @@
-package com.alibaba.middleware.race;
+package com.alibaba.middleware.race.impl;
+
+import com.alibaba.middleware.race.*;
 
 import java.io.*;
 import java.nio.ByteBuffer;
