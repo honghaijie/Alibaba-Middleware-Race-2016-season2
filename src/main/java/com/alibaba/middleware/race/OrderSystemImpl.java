@@ -676,6 +676,7 @@ public class OrderSystemImpl implements OrderSystem {
             long longSum = 0L;
             double doubleSum = 0.0;
             boolean isDouble = false;
+            int cnt = 0;
             try {
                 while (ans.hasNext()) {
                     Result pr = ans.next();
@@ -683,6 +684,7 @@ public class OrderSystemImpl implements OrderSystem {
                     if (t == null) {
                         continue;
                     }
+                    ++cnt;
                     double d = Double.parseDouble(t);
                     if (isDouble) {
                         doubleSum += d;
@@ -702,6 +704,7 @@ public class OrderSystemImpl implements OrderSystem {
                 */
                 return null;
             }
+            if (cnt == 0) return null;
             QueryKeyValue kv = new QueryKeyValue(key, isDouble ? ((Double) doubleSum).toString() : ((Long) longSum).toString());
             return kv;
         }
