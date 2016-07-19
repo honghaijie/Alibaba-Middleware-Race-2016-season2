@@ -629,15 +629,6 @@ public class OrderSystemImpl implements OrderSystem {
                 }
             });
 
-            Iterator<OrderSystem.Result> ff = rr.iterator();
-            while (ff.hasNext()) {
-                OrderSystem.Result r = ff.next();
-                for (OrderSystem.KeyValue k : r.getAll()) {
-                    System.out.print(k.key() + ":" + k.valueAsString() + ", ");
-                }
-                System.out.println();
-            }
-
             return rr.iterator();
         }
     }
