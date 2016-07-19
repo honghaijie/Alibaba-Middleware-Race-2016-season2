@@ -675,6 +675,9 @@ public class OrderSystemImpl implements OrderSystem {
                 for (String r : ans) {
                     Map<String, String> ls = Utils.ParseEntryStrToMap(r);
                     String t = ls.get(key);
+                    if (t == null) {
+                        continue;
+                    }
                     double d = Double.parseDouble(t);
                     if (isDouble) {
                         doubleSum += d;
