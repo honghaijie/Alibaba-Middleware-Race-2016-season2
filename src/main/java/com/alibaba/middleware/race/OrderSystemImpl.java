@@ -696,8 +696,11 @@ public class OrderSystemImpl implements OrderSystem {
 
                 }
             } catch (Exception e) {
+                /*
                 longSum = 0;
                 doubleSum = 0.0;
+                */
+                return null;
             }
             QueryKeyValue kv = new QueryKeyValue(key, isDouble ? ((Double) doubleSum).toString() : ((Long) longSum).toString());
             return kv;
