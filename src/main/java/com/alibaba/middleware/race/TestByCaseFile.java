@@ -54,7 +54,7 @@ public class TestByCaseFile {
 
         osi.construct(orderFiles, buyerFiles, goodFiles, storeFolders);
         int cnt = 0;
-        String filename = "D:\\middleware-data\\prerun_data\\prerun_data\\case.0";
+        String filename = "D:\\middleware-data\\prerun_data\\prerun_data\\case.head.txt";
         try {
 
             FileInputStream fis = new FileInputStream(filename);

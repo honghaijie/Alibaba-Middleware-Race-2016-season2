@@ -600,9 +600,9 @@ public class OrderSystemImpl implements OrderSystem {
         synchronized (this) {
             List<String> ans = QueryOrderByBuyer(Utils.hash(buyerid), startTime, endTime, orderBuyerIndexOffset, sortedOrderBuyerIndexBlockFiles);
             Map<String, String> buyerInfo = Utils.ParseEntryStrToMap(QueryBuyerByBuyer(buyerid));
-
-            if (ans.isEmpty()) return null;
             List<Result> rr = new ArrayList<>();
+            if (ans.isEmpty()) return rr.iterator();
+
             for (String r : ans) {
                 Map<String, String> ls = Utils.ParseEntryStrToMap(r);
                 Map<String, String> goodInfo = Utils.ParseEntryStrToMap(QueryGoodByGood(ls.get("goodid")));
@@ -635,8 +635,8 @@ public class OrderSystemImpl implements OrderSystem {
             } else {
                 attrs = null;
             }
-            if (ans.isEmpty()) return null;
             List<Result> rr = new ArrayList<>();
+            if (ans.isEmpty()) return rr.iterator();
             for (String r : ans) {
                 Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
                 String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
