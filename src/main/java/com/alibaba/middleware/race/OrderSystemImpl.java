@@ -471,8 +471,9 @@ public class OrderSystemImpl implements OrderSystem {
         try {
             //File file = new File(sortedIndexBlockFiles.get(blockId));
             ByteBuffer bb = ByteBuffer.allocate(len);
-            FileChannel.open(Paths.get(sortedIndexBlockFiles.get(blockId))).position(offset).read(bb);
-
+            FileChannel fc = FileChannel.open(Paths.get(sortedIndexBlockFiles.get(blockId)));
+            fc.position(offset).read(bb);
+            fc.close();
             byte[] buf = bb.array();
             long[] ls = Utils.byteArrayToLongArray(buf);
             List<Tuple<Long, Long>> r = new ArrayList<>();
@@ -518,8 +519,9 @@ public class OrderSystemImpl implements OrderSystem {
         try {
             //File file = new File(sortedIndexBlockFiles.get(blockId));
             ByteBuffer bb = ByteBuffer.allocate(len);
-            FileChannel.open(Paths.get(sortedIndexBlockFiles.get(blockId))).position(offset).read(bb);
-
+            FileChannel fc = FileChannel.open(Paths.get(sortedIndexBlockFiles.get(blockId)));
+            fc.position(offset).read(bb);
+            fc.close();
             byte[] buf = bb.array();
             long[] ls = Utils.byteArrayToLongArray(buf);
             List<Tuple<Long, Long>> r = new ArrayList<>();
