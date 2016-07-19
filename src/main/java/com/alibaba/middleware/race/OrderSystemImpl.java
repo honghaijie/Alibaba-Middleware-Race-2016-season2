@@ -516,9 +516,9 @@ public class OrderSystemImpl implements OrderSystem {
         int len = (int)(blockIndex.ceilingEntry(buyerIndexEntryUpperBound).getValue() - offset);
 
         try {
-            File file = new File(sortedIndexBlockFiles.get(blockId));
+            //File file = new File(sortedIndexBlockFiles.get(blockId));
             ByteBuffer bb = ByteBuffer.allocate(len);
-            FileChannel.open(file.toPath()).position(offset).read(bb);
+            FileChannel.open(Paths.get(sortedIndexBlockFiles.get(blockId))).position(offset).read(bb);
 
             byte[] buf = bb.array();
             long[] ls = Utils.byteArrayToLongArray(buf);
