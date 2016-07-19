@@ -4,6 +4,8 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,9 +27,9 @@ public class OrderSystemImpl implements OrderSystem {
     private Map<String, Integer> goodFileIdMapper = new TreeMap<String, Integer>();
     private Map<Integer, String> goodFileIdMapperRev = new TreeMap<Integer, String>();
 
-    static final int orderBlockNum = 10;
-    static final int buyerBlockNum = 5;
-    static final int goodBlockNum = 5;
+    static final int orderBlockNum = 4;
+    static final int buyerBlockNum = 2;
+    static final int goodBlockNum = 2;
     static final int bufferSize = 64 * 1024;
     static final int memoryOrderIndexSize = 1000;
     static final int memoryGoodIndexSize = 100;
@@ -152,6 +154,7 @@ public class OrderSystemImpl implements OrderSystem {
                 offset += (line + "\n").getBytes(StandardCharsets.UTF_8).length;
                 ++total;
             }
+            reader.close();
         }
         return total;
     }
@@ -191,6 +194,7 @@ public class OrderSystemImpl implements OrderSystem {
                 offset += (line + "\n").getBytes(StandardCharsets.UTF_8).length;
                 ++total;
             }
+            reader.close();
         }
         return total;
     }
@@ -260,6 +264,7 @@ public class OrderSystemImpl implements OrderSystem {
                 offset += (line + "\n").getBytes(StandardCharsets.UTF_8).length;
                 ++total;
             }
+            reader.close();
         }
         return total;
     }
@@ -464,9 +469,9 @@ public class OrderSystemImpl implements OrderSystem {
         int len = (int)(blockIndex.higherEntry(id).getValue() - offset);
 
         try {
-            File file = new File(sortedIndexBlockFiles.get(blockId));
+            //File file = new File(sortedIndexBlockFiles.get(blockId));
             ByteBuffer bb = ByteBuffer.allocate(len);
-            FileChannel.open(file.toPath()).position(offset).read(bb);
+            FileChannel.open(Paths.get(sortedIndexBlockFiles.get(blockId))).position(offset).read(bb);
 
             byte[] buf = bb.array();
             long[] ls = Utils.byteArrayToLongArray(buf);
