@@ -32,7 +32,7 @@ public class Test {
             System.out.println(e);
         }
 */
-        Iterator<OrderSystem.Result> ans = Arrays.asList(osi.queryOrder(624813187L, null)).iterator();
+        Iterator<OrderSystem.Result> ans = Arrays.asList(osi.queryOrder(624813187L, Arrays.asList("amount"))).iterator();
         while (ans.hasNext()) {
             OrderSystem.Result r = ans.next();
             for (OrderSystem.KeyValue k : r.getAll()) {

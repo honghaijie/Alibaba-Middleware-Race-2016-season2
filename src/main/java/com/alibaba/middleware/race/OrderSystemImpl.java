@@ -585,7 +585,7 @@ public class OrderSystemImpl implements OrderSystem {
 
             Map<String, String> rt = new HashMap<>();
             for (Map.Entry<String, String> t : orderLs.entrySet()) {
-                if (attrs == null || attrs.contains(t.getKey())) {
+                if (t.getKey().equals("orderid") || attrs == null || attrs.contains(t.getKey())) {
                     rt.put(t.getKey(), t.getValue());
                 }
             }
