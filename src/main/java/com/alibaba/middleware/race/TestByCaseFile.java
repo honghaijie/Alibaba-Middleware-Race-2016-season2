@@ -33,6 +33,7 @@ public class TestByCaseFile {
         String[] kvs = kvStr.split(",");
         for (String kv : kvs) {
             String t = kv.trim();
+
             if (t.equals("")) continue;
             String[] tp = t.split(":");
             String k = tp[0], v = tp[1];
@@ -60,7 +61,7 @@ public class TestByCaseFile {
             BufferedReader br = new BufferedReader(new InputStreamReader(fis, StandardCharsets.UTF_8));
             while (true) {
                 ++cnt;
-                if (cnt == 13) {
+                if (cnt == 6) {
                     int aaa = 1;
                 }
                 String cs = br.readLine();

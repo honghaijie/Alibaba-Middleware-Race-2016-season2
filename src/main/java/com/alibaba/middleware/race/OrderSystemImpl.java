@@ -670,15 +670,16 @@ public class OrderSystemImpl implements OrderSystem {
     @Override
     public KeyValue sumOrdersByGood(String goodid, String key) {
         synchronized (this) {
-            List<String> ans = QueryEntryById(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, orderFileIdMapperRev);
-            if (ans.isEmpty()) return null;
+            //List<String> ans = QueryEntryById(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, orderFileIdMapperRev);
+            Iterator<Result> ans = queryOrdersBySaler("", goodid, Arrays.asList(key));
+            if (!ans.hasNext()) return null;
             long longSum = 0L;
             double doubleSum = 0.0;
             boolean isDouble = false;
             try {
-                for (String r : ans) {
-                    Map<String, String> ls = Utils.ParseEntryStrToMap(r);
-                    String t = ls.get(key);
+                while (ans.hasNext()) {
+                    Result pr = ans.next();
+                    String t = pr.get(key).valueAsString();
                     if (t == null) {
                         continue;
                     }
