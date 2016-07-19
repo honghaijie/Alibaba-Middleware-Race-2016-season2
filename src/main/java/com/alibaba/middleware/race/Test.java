@@ -32,8 +32,8 @@ public class Test {
             System.out.println(e);
         }
 */
-        /*
-        Iterator<OrderSystem.Result> ans = Arrays.asList(osi.queryOrder(624813187L, Arrays.asList("amount"))).iterator();
+
+        Iterator<OrderSystem.Result> ans = osi.queryOrdersByBuyer(1459365936L, 1488509290L, "tp-9218-48b0b7e7e6ec");
         while (ans.hasNext()) {
             OrderSystem.Result r = ans.next();
             for (OrderSystem.KeyValue k : r.getAll()) {
@@ -42,10 +42,12 @@ public class Test {
             System.out.println();
         }
         System.out.printf("Time: %f\n", (System.currentTimeMillis() - startTime) / 1000.0);
-        */
+
+        /*
         OrderSystem.KeyValue ans = osi.sumOrdersByGood("aye-a156-162c1d69d26c", "a_o_22304");
         System.out.print(ans.key() + ":" + ans.valueAsString() + ", ");
 
         System.out.printf("Time: %f\n", (System.currentTimeMillis() - startTime) / 1000.0);
+        */
     }
 }
