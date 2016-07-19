@@ -672,7 +672,7 @@ public class OrderSystemImpl implements OrderSystem {
         synchronized (this) {
             //List<String> ans = QueryEntryById(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, orderFileIdMapperRev);
             Iterator<Result> ans = queryOrdersBySaler("", goodid, Arrays.asList(key));
-            if (!ans.hasNext()) return null;
+            if (!ans.hasNext()) return new QueryKeyValue(key, "0");
             long longSum = 0L;
             double doubleSum = 0.0;
             boolean isDouble = false;
