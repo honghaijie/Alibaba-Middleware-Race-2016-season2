@@ -623,14 +623,75 @@ public class OrderSystemImpl implements OrderSystem {
 
     @Override
     public Result queryOrder(long orderId, Collection<String> keys) {
-        synchronized (this) {
-            List<String> ans = QueryEntryById(orderId, orderBlockNum, orderOrderIndexOffset, sortedOrderOrderIndexBlockFiles, orderFileIdMapperRev);
-            Set<String> attrs = null;
-            if (keys != null) {
-                attrs = new HashSet<>(keys);
+        List<String> ans = QueryEntryById(orderId, orderBlockNum, orderOrderIndexOffset, sortedOrderOrderIndexBlockFiles, orderFileIdMapperRev);
+        Set<String> attrs = null;
+        if (keys != null) {
+            attrs = new HashSet<>(keys);
+        }
+        if (ans.isEmpty()) return null;
+        String r = ans.get(0);
+        Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
+        String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
+        String goodStr = QueryGoodByGood(orderLs.get("goodid"));
+        orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
+        orderLs.putAll(Utils.ParseEntryStrToMap(goodStr));
+
+        Map<String, String> rt = new HashMap<>();
+        for (Map.Entry<String, String> t : orderLs.entrySet()) {
+            if (t.getKey().equals("orderid") || attrs == null || attrs.contains(t.getKey())) {
+                rt.put(t.getKey(), t.getValue());
             }
-            if (ans.isEmpty()) return null;
-            String r = ans.get(0);
+        }
+
+
+        return new QueryResult(rt);
+
+    }
+
+    @Override
+    public Iterator<Result> queryOrdersByBuyer(long startTime, long endTime, String buyerid) {
+        List<String> ans = QueryOrderByBuyer(Utils.hash(buyerid), startTime, endTime, orderBuyerIndexOffset, sortedOrderBuyerIndexBlockFiles);
+        List<Result> rr = new ArrayList<>();
+        if (ans.isEmpty()) return rr.iterator();
+        Map<String, String> buyerInfo = Utils.ParseEntryStrToMap(QueryBuyerByBuyer(buyerid));
+
+
+
+        for (String r : ans) {
+            Map<String, String> ls = Utils.ParseEntryStrToMap(r);
+            Map<String, String> goodInfo = Utils.ParseEntryStrToMap(QueryGoodByGood(ls.get("goodid")));
+            ls.putAll(buyerInfo);
+            ls.putAll(goodInfo);
+            rr.add(new QueryResult(ls));
+        }
+        Collections.sort(rr, new Comparator<Result>() {
+            @Override
+            public int compare(Result o1, Result o2) {
+                try {
+                    return -((Long) o1.get("createtime").valueAsLong()).compareTo(o2.get("createtime").valueAsLong());
+                } catch (TypeException e) {
+                    e.printStackTrace();
+                }
+                return 0;
+            }
+        });
+
+        return rr.iterator();
+
+    }
+
+    @Override
+    public Iterator<Result> queryOrdersBySaler(String salerid, String goodid, Collection<String> keys) {
+        List<String> ans = QueryEntryById(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, orderFileIdMapperRev);
+        Set<String> attrs = null;
+        if (keys != null) {
+            attrs = new HashSet<>(keys);
+        } else {
+            attrs = null;
+        }
+        List<Result> rr = new ArrayList<>();
+        if (ans.isEmpty()) return rr.iterator();
+        for (String r : ans) {
             Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
             String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
             String goodStr = QueryGoodByGood(orderLs.get("goodid"));
@@ -643,128 +704,63 @@ public class OrderSystemImpl implements OrderSystem {
                     rt.put(t.getKey(), t.getValue());
                 }
             }
-
-
-            return new QueryResult(rt);
+            rr.add(new QueryResult(rt));
         }
-    }
-
-    @Override
-    public Iterator<Result> queryOrdersByBuyer(long startTime, long endTime, String buyerid) {
-        synchronized (this) {
-            List<String> ans = QueryOrderByBuyer(Utils.hash(buyerid), startTime, endTime, orderBuyerIndexOffset, sortedOrderBuyerIndexBlockFiles);
-            List<Result> rr = new ArrayList<>();
-            if (ans.isEmpty()) return rr.iterator();
-            Map<String, String> buyerInfo = Utils.ParseEntryStrToMap(QueryBuyerByBuyer(buyerid));
-
-
-
-            for (String r : ans) {
-                Map<String, String> ls = Utils.ParseEntryStrToMap(r);
-                Map<String, String> goodInfo = Utils.ParseEntryStrToMap(QueryGoodByGood(ls.get("goodid")));
-                ls.putAll(buyerInfo);
-                ls.putAll(goodInfo);
-                rr.add(new QueryResult(ls));
-            }
-            Collections.sort(rr, new Comparator<Result>() {
-                @Override
-                public int compare(Result o1, Result o2) {
-                    try {
-                        return -((Long) o1.get("createtime").valueAsLong()).compareTo(o2.get("createtime").valueAsLong());
-                    } catch (TypeException e) {
-                        e.printStackTrace();
-                    }
-                    return 0;
+        Collections.sort(rr, new Comparator<Result>() {
+            @Override
+            public int compare(Result o1, Result o2) {
+                try {
+                    return ((Long) o1.get("orderid").valueAsLong()).compareTo(o2.get("orderid").valueAsLong());
+                } catch (TypeException e) {
+                    e.printStackTrace();
                 }
-            });
-
-            return rr.iterator();
-        }
-    }
-
-    @Override
-    public Iterator<Result> queryOrdersBySaler(String salerid, String goodid, Collection<String> keys) {
-        synchronized (this) {
-            List<String> ans = QueryEntryById(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, orderFileIdMapperRev);
-            Set<String> attrs = null;
-            if (keys != null) {
-                attrs = new HashSet<>(keys);
-            } else {
-                attrs = null;
+                return 0;
             }
-            List<Result> rr = new ArrayList<>();
-            if (ans.isEmpty()) return rr.iterator();
-            for (String r : ans) {
-                Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
-                String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
-                String goodStr = QueryGoodByGood(orderLs.get("goodid"));
-                orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
-                orderLs.putAll(Utils.ParseEntryStrToMap(goodStr));
+        });
+        return rr.iterator();
 
-                Map<String, String> rt = new HashMap<>();
-                for (Map.Entry<String, String> t : orderLs.entrySet()) {
-                    if (t.getKey().equals("orderid") || attrs == null || attrs.contains(t.getKey())) {
-                        rt.put(t.getKey(), t.getValue());
-                    }
-                }
-                rr.add(new QueryResult(rt));
-            }
-            Collections.sort(rr, new Comparator<Result>() {
-                @Override
-                public int compare(Result o1, Result o2) {
-                    try {
-                        return ((Long) o1.get("orderid").valueAsLong()).compareTo(o2.get("orderid").valueAsLong());
-                    } catch (TypeException e) {
-                        e.printStackTrace();
-                    }
-                    return 0;
-                }
-            });
-            return rr.iterator();
-        }
     }
 
     @Override
     public KeyValue sumOrdersByGood(String goodid, String key) {
-        synchronized (this) {
-            //List<String> ans = QueryEntryById(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, orderFileIdMapperRev);
-            Iterator<Result> ans = queryOrdersBySaler("", goodid, Arrays.asList(key));
-            if (!ans.hasNext()) return null;
-            long longSum = 0L;
-            double doubleSum = 0.0;
-            boolean isDouble = false;
-            int cnt = 0;
-            try {
-                while (ans.hasNext()) {
-                    Result pr = ans.next();
-                    String t = pr.get(key).valueAsString();
-                    if (t == null) {
-                        continue;
-                    }
-                    ++cnt;
-                    double d = Double.parseDouble(t);
-                    if (isDouble) {
-                        doubleSum += d;
-                    } else if (t.contains(".")) {
-                        isDouble = true;
-                        doubleSum = longSum;
-                        doubleSum += d;
-                    } else {
-                        longSum += Long.parseLong(t);
-                    }
-
+        //List<String> ans = QueryEntryById(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, orderFileIdMapperRev);
+        Iterator<Result> ans = queryOrdersBySaler("", goodid, Arrays.asList(key));
+        if (!ans.hasNext()) return null;
+        long longSum = 0L;
+        double doubleSum = 0.0;
+        boolean isDouble = false;
+        int cnt = 0;
+        try {
+            while (ans.hasNext()) {
+                Result pr = ans.next();
+                String t = pr.get(key).valueAsString();
+                if (t == null) {
+                    continue;
                 }
-            } catch (Exception e) {
-                /*
-                longSum = 0;
-                doubleSum = 0.0;
-                */
-                return null;
+                ++cnt;
+                double d = Double.parseDouble(t);
+                if (isDouble) {
+                    doubleSum += d;
+                } else if (t.contains(".")) {
+                    isDouble = true;
+                    doubleSum = longSum;
+                    doubleSum += d;
+                } else {
+                    longSum += Long.parseLong(t);
+                }
+
             }
-            if (cnt == 0) return null;
-            QueryKeyValue kv = new QueryKeyValue(key, isDouble ? ((Double) doubleSum).toString() : ((Long) longSum).toString());
-            return kv;
+        } catch (Exception e) {
+            /*
+            longSum = 0;
+            doubleSum = 0.0;
+            */
+            return null;
         }
+        if (cnt == 0) return null;
+        QueryKeyValue kv = new QueryKeyValue(key, isDouble ? ((Double) doubleSum).toString() : ((Long) longSum).toString());
+        return kv;
+
     }
 
     public static void main(String[] args) throws InterruptedException, KeyException, IOException, TypeException {

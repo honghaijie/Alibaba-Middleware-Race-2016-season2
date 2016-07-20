@@ -25,19 +25,19 @@
       <file leaf-file-name="OrderSystemImpl.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.13139932">
-              <caret line="543" column="20" selection-start-line="543" selection-start-column="20" selection-end-line="543" selection-end-column="20" />
+            <state vertical-scroll-proportion="1.1877133">
+              <caret line="646" column="35" selection-start-line="646" selection-start-column="35" selection-end-line="646" selection-end-column="35" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#679#698#0" expanded="true" />
                 <element signature="e#1199#1216#0" expanded="true" />
-                <element signature="method#QueryBuyerByBuyer#0;class#OrderSystemImpl#0" expanded="false" />
-                <element signature="method#QueryGoodByGood#0;class#OrderSystemImpl#0" expanded="false" />
-                <element signature="method#construct#0;class#OrderSystemImpl#0" expanded="false" />
-                <element signature="e#33927#34364#0" expanded="true" />
-                <element signature="e#34363#34364#0" expanded="true" />
-                <element signature="e#35828#36258#0" expanded="true" />
-                <element signature="e#36257#36258#0" expanded="true" />
+                <element signature="method#PreProcessOrders#0;class#OrderSystemImpl#0" expanded="false" />
+                <element signature="method#QueryEntryById#0;class#OrderSystemImpl#0" expanded="false" />
+                <element signature="method#QueryOrderByBuyer#0;class#OrderSystemImpl#0" expanded="false" />
+                <element signature="e#33734#34131#0" expanded="true" />
+                <element signature="e#34130#34131#0" expanded="true" />
+                <element signature="e#35456#35846#0" expanded="true" />
+                <element signature="e#35845#35846#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -594,7 +594,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -678,13 +678,13 @@
             <element signature="imports" expanded="true" />
             <element signature="e#679#698#0" expanded="true" />
             <element signature="e#1199#1216#0" expanded="true" />
-            <element signature="method#QueryBuyerByBuyer#0;class#OrderSystemImpl#0" expanded="false" />
-            <element signature="method#QueryGoodByGood#0;class#OrderSystemImpl#0" expanded="false" />
-            <element signature="method#construct#0;class#OrderSystemImpl#0" expanded="false" />
-            <element signature="e#33927#34364#0" expanded="true" />
-            <element signature="e#34363#34364#0" expanded="true" />
-            <element signature="e#35828#36258#0" expanded="true" />
-            <element signature="e#36257#36258#0" expanded="true" />
+            <element signature="method#PreProcessOrders#0;class#OrderSystemImpl#0" expanded="false" />
+            <element signature="method#QueryEntryById#0;class#OrderSystemImpl#0" expanded="false" />
+            <element signature="method#QueryOrderByBuyer#0;class#OrderSystemImpl#0" expanded="false" />
+            <element signature="e#33734#34131#0" expanded="true" />
+            <element signature="e#34130#34131#0" expanded="true" />
+            <element signature="e#35456#35846#0" expanded="true" />
+            <element signature="e#35845#35846#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1071,19 +1071,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.13139932">
-          <caret line="543" column="20" selection-start-line="543" selection-start-column="20" selection-end-line="543" selection-end-column="20" />
+        <state vertical-scroll-proportion="1.1877133">
+          <caret line="646" column="35" selection-start-line="646" selection-start-column="35" selection-end-line="646" selection-end-column="35" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#679#698#0" expanded="true" />
             <element signature="e#1199#1216#0" expanded="true" />
-            <element signature="method#QueryBuyerByBuyer#0;class#OrderSystemImpl#0" expanded="false" />
-            <element signature="method#QueryGoodByGood#0;class#OrderSystemImpl#0" expanded="false" />
-            <element signature="method#construct#0;class#OrderSystemImpl#0" expanded="false" />
-            <element signature="e#33927#34364#0" expanded="true" />
-            <element signature="e#34363#34364#0" expanded="true" />
-            <element signature="e#35828#36258#0" expanded="true" />
-            <element signature="e#36257#36258#0" expanded="true" />
+            <element signature="method#PreProcessOrders#0;class#OrderSystemImpl#0" expanded="false" />
+            <element signature="method#QueryEntryById#0;class#OrderSystemImpl#0" expanded="false" />
+            <element signature="method#QueryOrderByBuyer#0;class#OrderSystemImpl#0" expanded="false" />
+            <element signature="e#33734#34131#0" expanded="true" />
+            <element signature="e#34130#34131#0" expanded="true" />
+            <element signature="e#35456#35846#0" expanded="true" />
+            <element signature="e#35845#35846#0" expanded="true" />
           </folding>
         </state>
       </provider>
