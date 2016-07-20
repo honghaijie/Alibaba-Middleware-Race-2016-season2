@@ -324,6 +324,7 @@ public class OrderSystemImpl implements OrderSystem {
     }
     private Map<String, TreeMap<Tuple<Long, Long>, Long>> SortBuyerOffset(List<String> unOrderedFiles, List<String> orderedFiles, long ratio) throws IOException, KeyException, InterruptedException {
         Map<String, TreeMap<Tuple<Long, Long>, Long>> res = new HashMap<>();
+
         for (int i = 0; i < unOrderedFiles.size(); ++i) {
             String unOrderedFilename = unOrderedFiles.get(i);
             String orderedFilename = orderedFiles.get(i);
@@ -339,6 +340,7 @@ public class OrderSystemImpl implements OrderSystem {
                 if (len == -1) break;
                 long[] e = Utils.byteArrayToLongArray(entryBytes);
                 indexList.add(new Tuple<Tuple<Long, Long>, Tuple<Long, Long>>(new Tuple<Long, Long>(e[0], e[1]), new Tuple<Long, Long>(e[2], e[3])));
+
             }
             bis.close();
             Collections.sort(indexList);
@@ -358,8 +360,8 @@ public class OrderSystemImpl implements OrderSystem {
                 }
                 offset += entryLength;
             }
-            currentMap.put(new Tuple<Long, Long>(Long.MIN_VALUE, Long.MIN_VALUE), 0L);
-            currentMap.put(new Tuple<Long, Long>(Long.MAX_VALUE, Long.MAX_VALUE), offset);
+            currentMap.put(indexList.get(0).x, 0L);
+            currentMap.put(indexList.get(indexList.size() - 1).x, offset);
             res.put(orderedFilename, currentMap);
             fos.close();
         }
@@ -545,49 +547,59 @@ public class OrderSystemImpl implements OrderSystem {
     private List<String> QueryOrderByBuyer(long buyerHashVal, long from, long to, Map<String, TreeMap<Tuple<Long, Long>, Long>> indexOffset, List<String> sortedIndexBlockFiles) {
         Tuple<Long, Long> buyerIndexEntryLowerBound = new Tuple<>(buyerHashVal, from);
         Tuple<Long, Long> buyerIndexEntryUpperBound = new Tuple<>(buyerHashVal, to);
-        int blockId = buyerBlockMapper.floorEntry(buyerIndexEntryLowerBound).getValue();
+        //int blockId = buyerBlockMapper.floorEntry(buyerIndexEntryLowerBound).getValue();
+        List<String> ans = new ArrayList<>();
 
-        TreeMap<Tuple<Long, Long>, Long> blockIndex = indexOffset.get(sortedIndexBlockFiles.get(blockId));
-        long offset = blockIndex.floorEntry(buyerIndexEntryLowerBound).getValue();
-        int len = (int)(blockIndex.ceilingEntry(buyerIndexEntryUpperBound).getValue() - offset);
+        Tuple<Long, Long> buyerIndexSubmapLowerBound = buyerBlockMapper.floorKey(buyerIndexEntryLowerBound);
+        for (int blockId : buyerBlockMapper.subMap(buyerIndexSubmapLowerBound, buyerIndexEntryUpperBound).values()) {
 
-        try {
-            //File file = new File(sortedIndexBlockFiles.get(blockId));
-            ByteBuffer bb = ByteBuffer.allocate(len);
-            FileChannel fc = FileChannel.open(Paths.get(sortedIndexBlockFiles.get(blockId)));
-            fc.position(offset).read(bb);
-            fc.close();
-            byte[] buf = bb.array();
-            long[] ls = Utils.byteArrayToLongArray(buf);
-            List<Tuple<Long, Long>> r = new ArrayList<>();
-            for (int i = 0; i < ls.length; i += 4) {
-                if (ls[i] == buyerHashVal && ls[i + 1] >= from && ls[i + 1] < to) {
-                    long fileId = ls[i + 2];
-                    long rawOffset = ls[i + 3];
-                    r.add(new Tuple<Long, Long>(fileId, rawOffset));
+            TreeMap<Tuple<Long, Long>, Long> blockIndex = indexOffset.get(sortedIndexBlockFiles.get(blockId));
+            Map.Entry<Tuple<Long, Long>, Long> floorEntry = blockIndex.floorEntry(buyerIndexEntryLowerBound);
+            Map.Entry<Tuple<Long, Long>, Long> ceilingEntry = blockIndex.ceilingEntry(buyerIndexEntryUpperBound);
+            if (floorEntry == null ) {
+                floorEntry = blockIndex.firstEntry();
+            }
+            if (ceilingEntry == null) {
+                ceilingEntry = blockIndex.lastEntry();
+            }
+            long offset = floorEntry.getValue();
+            int len = (int) (ceilingEntry.getValue() - offset);
+
+            try {
+                //File file = new File(sortedIndexBlockFiles.get(blockId));
+                ByteBuffer bb = ByteBuffer.allocate(len);
+                FileChannel fc = fcMap.get(sortedIndexBlockFiles.get(blockId));
+                fc.position(offset).read(bb);
+                byte[] buf = bb.array();
+                long[] ls = Utils.byteArrayToLongArray(buf);
+                List<Tuple<Long, Long>> r = new ArrayList<>();
+                for (int i = 0; i < ls.length; i += 4) {
+                    if (ls[i] == buyerHashVal && ls[i + 1] >= from && ls[i + 1] < to) {
+                        long fileId = ls[i + 2];
+                        long rawOffset = ls[i + 3];
+                        r.add(new Tuple<Long, Long>(fileId, rawOffset));
+                    }
                 }
-            }
-            List<String> ans = new ArrayList<>();
-            for (Tuple<Long, Long> item : r) {
-                long fileId = item.x;
-                long rawOffset = item.y;
-                File f = new File(orderFileIdMapperRev.get((int) fileId));
-                FileInputStream fis = new FileInputStream(f);
-                fis.skip(rawOffset);
-                InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-                BufferedReader reader = new BufferedReader(isr, 1024);
-                ans.add(reader.readLine());
 
-                reader.close();
+                for (Tuple<Long, Long> item : r) {
+                    long fileId = item.x;
+                    long rawOffset = item.y;
+
+                    FileChannel rfc = fcMap.get(orderFileIdMapperRev.get((int) fileId));
+                    BufferedReader reader = new BufferedReader(Channels.newReader(rfc.position(rawOffset), Charset.forName("utf8").newDecoder(), 4096));
+
+                    ans.add(reader.readLine());
+
+                }
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
             }
-            return ans;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
         }
-        return null;
+        return ans;
     }
 
     private String QueryBuyerByBuyer(String buyerid) {
