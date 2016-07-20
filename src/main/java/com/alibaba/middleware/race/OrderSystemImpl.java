@@ -641,6 +641,9 @@ public class OrderSystemImpl implements OrderSystem {
     public Result queryOrder(long orderId, Collection<String> keys) {
         List<String> ans = QueryEntryById(orderId, orderBlockNum, orderOrderIndexOffset, sortedOrderOrderIndexBlockFiles, orderFileIdMapperRev);
         Set<String> attrs = null;
+        if (keys == null) {
+            keys = attrToTable.keySet();
+        }
         if (keys != null) {
             attrs = new HashSet<>(keys);
         }
@@ -711,6 +714,9 @@ public class OrderSystemImpl implements OrderSystem {
     public Iterator<Result> queryOrdersBySaler(String salerid, String goodid, Collection<String> keys) {
         List<String> ans = QueryEntryById(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, orderFileIdMapperRev);
         Set<String> attrs = null;
+        if (keys == null) {
+            keys = attrToTable.keySet();
+        }
         if (keys != null) {
             attrs = new HashSet<>(keys);
         } else {
