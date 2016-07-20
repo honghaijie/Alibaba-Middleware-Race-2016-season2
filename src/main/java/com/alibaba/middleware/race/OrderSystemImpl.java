@@ -503,7 +503,9 @@ public class OrderSystemImpl implements OrderSystem {
             ByteBuffer bb = ByteBuffer.allocate(len);
             //FileChannel fc = FileChannel.open(Paths.get(sortedIndexBlockFiles.get(blockId)));
             FileChannel fc = fcMap.get(sortedIndexBlockFiles.get(blockId));
-            fc.position(offset).read(bb);
+            synchronized (fc) {
+                fc.position(offset).read(bb);
+            }
             byte[] buf = bb.array();
             long[] ls = Utils.byteArrayToLongArray(buf);
             List<Tuple<Long, Long>> r = new ArrayList<>();
@@ -528,10 +530,10 @@ public class OrderSystemImpl implements OrderSystem {
                 BufferedReader reader = new BufferedReader(isr, 1024);
                 */
                 FileChannel rfc = fcMap.get(fileIdMapperRev.get((int) fileId));
-                BufferedReader reader = new BufferedReader(Channels.newReader(rfc.position(rawOffset), Charset.forName("utf8").newDecoder(), 4096));
-
-                ans.add(reader.readLine());
-
+                synchronized (rfc) {
+                    BufferedReader reader = new BufferedReader(Channels.newReader(rfc.position(rawOffset), Charset.forName("utf8").newDecoder(), 4096));
+                    ans.add(reader.readLine());
+                }
                 //reader.close();
             }
             return ans;
@@ -569,7 +571,9 @@ public class OrderSystemImpl implements OrderSystem {
                 //File file = new File(sortedIndexBlockFiles.get(blockId));
                 ByteBuffer bb = ByteBuffer.allocate(len);
                 FileChannel fc = fcMap.get(sortedIndexBlockFiles.get(blockId));
-                fc.position(offset).read(bb);
+                synchronized (fc) {
+                    fc.position(offset).read(bb);
+                }
                 byte[] buf = bb.array();
                 long[] ls = Utils.byteArrayToLongArray(buf);
                 List<Tuple<Long, Long>> r = new ArrayList<>();
@@ -586,9 +590,11 @@ public class OrderSystemImpl implements OrderSystem {
                     long rawOffset = item.y;
 
                     FileChannel rfc = fcMap.get(orderFileIdMapperRev.get((int) fileId));
-                    BufferedReader reader = new BufferedReader(Channels.newReader(rfc.position(rawOffset), Charset.forName("utf8").newDecoder(), 4096));
 
-                    ans.add(reader.readLine());
+                    synchronized (rfc) {
+                        BufferedReader reader = new BufferedReader(Channels.newReader(rfc.position(rawOffset), Charset.forName("utf8").newDecoder(), 4096));
+                        ans.add(reader.readLine());
+                    }
 
                 }
 
