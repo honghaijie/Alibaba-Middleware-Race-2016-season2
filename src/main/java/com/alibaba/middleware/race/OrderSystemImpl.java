@@ -652,7 +652,7 @@ public class OrderSystemImpl implements OrderSystem {
         Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
 
         for (String key : keys) {
-            if (attrToTable.get(key).equals(Config.BuyerTable)) {
+            if (Config.BuyerTable.equals(attrToTable.get(key))) {
                 String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
                 orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
                 break;
@@ -660,7 +660,7 @@ public class OrderSystemImpl implements OrderSystem {
         }
 
         for (String key : keys) {
-            if (attrToTable.get(key).equals(Config.GoodTable)) {
+            if (Config.GoodTable.equals(attrToTable.get(key))) {
                 String goodStr = QueryGoodByGood(orderLs.get("goodid"));
                 orderLs.putAll(Utils.ParseEntryStrToMap(goodStr));
             }
@@ -727,7 +727,7 @@ public class OrderSystemImpl implements OrderSystem {
 
         Map<String, String> goodAttr = new HashMap<>();
         for (String key : keys) {
-            if (attrToTable.get(key).equals(Config.GoodTable)) {
+            if (Config.GoodTable.equals(attrToTable.get(key))) {
                 String goodStr = QueryGoodByGood(goodid);
                 goodAttr = Utils.ParseEntryStrToMap(goodStr);
                 break;
@@ -737,7 +737,7 @@ public class OrderSystemImpl implements OrderSystem {
         for (String r : ans) {
             Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
             for (String key : keys) {
-                if (attrToTable.get(key).equals(Config.BuyerTable)) {
+                if (Config.BuyerTable.equals(attrToTable.get(key))) {
                     String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
                     orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
                 }
