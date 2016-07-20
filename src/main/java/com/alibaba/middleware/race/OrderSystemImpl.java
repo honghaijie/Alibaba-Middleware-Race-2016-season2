@@ -81,7 +81,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     }
     private List<Tuple<Long, Long>> RandomOrder(List<String> orderFiles, int size) {
-        Random rd = new Random();
+        Random rd = new Random(123);
         List<Tuple<Long, Long>> ans = new ArrayList<>();
 
         for (int orderFileId = 0; orderFileId < orderFiles.size(); ++orderFileId) {
