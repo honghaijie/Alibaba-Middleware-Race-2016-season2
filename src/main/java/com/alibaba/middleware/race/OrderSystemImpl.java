@@ -606,9 +606,11 @@ public class OrderSystemImpl implements OrderSystem {
     public Iterator<Result> queryOrdersByBuyer(long startTime, long endTime, String buyerid) {
         synchronized (this) {
             List<String> ans = QueryOrderByBuyer(Utils.hash(buyerid), startTime, endTime, orderBuyerIndexOffset, sortedOrderBuyerIndexBlockFiles);
-            Map<String, String> buyerInfo = Utils.ParseEntryStrToMap(QueryBuyerByBuyer(buyerid));
             List<Result> rr = new ArrayList<>();
             if (ans.isEmpty()) return rr.iterator();
+            Map<String, String> buyerInfo = Utils.ParseEntryStrToMap(QueryBuyerByBuyer(buyerid));
+
+
 
             for (String r : ans) {
                 Map<String, String> ls = Utils.ParseEntryStrToMap(r);
