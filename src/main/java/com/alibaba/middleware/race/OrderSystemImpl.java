@@ -71,6 +71,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     TreeMap<Tuple<Long, Long>, Integer> buyerBlockMapper = new TreeMap<>();
 
+    Map<String, String> attrToTable = new HashMap<>();
     long orderEntriesCount = 0;
 
     //WARNING
@@ -144,6 +145,9 @@ public class OrderSystemImpl implements OrderSystem {
                 if (line == null) break;
                 Map<String, String> attr = Utils.ParseEntryStrToMap(line);
                 String goodid = attr.get("goodid");
+                for (String t : attr.keySet()) {
+                    attrToTable.put(t, Config.GoodTable);
+                }
                 long goodIdHashVal = Utils.hash(goodid);
 
                 int goodBlockId = (int)(goodIdHashVal % goodBlockNum);
@@ -183,6 +187,9 @@ public class OrderSystemImpl implements OrderSystem {
 
                 if (line == null) break;
                 Map<String, String> attr = Utils.ParseEntryStrToMap(line);
+                for (String t : attr.keySet()) {
+                    attrToTable.put(t, Config.BuyerTable);
+                }
                 String buyerid = attr.get("buyerid");
                 long buyerIdHashVal = Utils.hash(buyerid);
 
@@ -224,6 +231,9 @@ public class OrderSystemImpl implements OrderSystem {
 
                 if (line == null) break;
                 Map<String, String> attr = Utils.ParseEntryStrToMap(line);
+                for (String t : attr.keySet()) {
+                    attrToTable.put(t, Config.OrderTable);
+                }
                 long orderId = Long.parseLong(attr.get("orderid"));
                 String goodid = attr.get("goodid");
                 String buyerid = attr.get("buyerid");
@@ -637,10 +647,21 @@ public class OrderSystemImpl implements OrderSystem {
         if (ans.isEmpty()) return null;
         String r = ans.get(0);
         Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
-        String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
-        String goodStr = QueryGoodByGood(orderLs.get("goodid"));
-        orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
-        orderLs.putAll(Utils.ParseEntryStrToMap(goodStr));
+
+        for (String key : keys) {
+            if (attrToTable.get(key).equals(Config.BuyerTable)) {
+                String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
+                orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
+                break;
+            }
+        }
+
+        for (String key : keys) {
+            if (attrToTable.get(key).equals(Config.GoodTable)) {
+                String goodStr = QueryGoodByGood(orderLs.get("goodid"));
+                orderLs.putAll(Utils.ParseEntryStrToMap(goodStr));
+            }
+        }
 
         Map<String, String> rt = new HashMap<>();
         for (Map.Entry<String, String> t : orderLs.entrySet()) {
@@ -697,12 +718,25 @@ public class OrderSystemImpl implements OrderSystem {
         }
         List<Result> rr = new ArrayList<>();
         if (ans.isEmpty()) return rr.iterator();
+
+        Map<String, String> goodAttr = new HashMap<>();
+        for (String key : keys) {
+            if (attrToTable.get(key).equals(Config.GoodTable)) {
+                String goodStr = QueryGoodByGood(goodid);
+                goodAttr = Utils.ParseEntryStrToMap(goodStr);
+                break;
+            }
+        }
+
         for (String r : ans) {
             Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
-            String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
-            String goodStr = QueryGoodByGood(orderLs.get("goodid"));
-            orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
-            orderLs.putAll(Utils.ParseEntryStrToMap(goodStr));
+            for (String key : keys) {
+                if (attrToTable.get(key).equals(Config.BuyerTable)) {
+                    String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
+                    orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
+                }
+            }
+            orderLs.putAll(goodAttr);
 
             Map<String, String> rt = new HashMap<>();
             for (Map.Entry<String, String> t : orderLs.entrySet()) {
