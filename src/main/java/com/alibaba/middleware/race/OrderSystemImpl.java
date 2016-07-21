@@ -1,6 +1,7 @@
 package com.alibaba.middleware.race;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -580,11 +581,10 @@ public class OrderSystemImpl implements OrderSystem {
         try {
             byte[] buf = new byte[len];
             //FileChannel fc = FileChannel.open(Paths.get(sortedIndexBlockFiles.get(blockId)));
-            MappedByteBuffer fc = mbbMap.get(sortedIndexBlockFiles.get(blockId));
-            synchronized (fc) {
-                fc.position((int)offset);
-                fc.get(buf);
-            }
+            ByteBuffer fc = mbbMap.get(sortedIndexBlockFiles.get(blockId)).slice();
+            fc.position((int)offset);
+            fc.get(buf);
+
             long[] ls = Utils.byteArrayToLongArray(buf);
             List<Tuple<Long, Long>> r = new ArrayList<>();
             for (int i = 0; i < ls.length; i += 3) {
@@ -611,12 +611,11 @@ public class OrderSystemImpl implements OrderSystem {
                 Tuple<String, Long> cacheKey = new Tuple<String, Long>(rawFilename, rawOffset);
                 String line = null;
                 if (line == null) {
-                    MappedByteBuffer rfc = mbbMap.get(rawFilename);
+                    ByteBuffer rfc = mbbMap.get(rawFilename).slice();
 
-                    synchronized (rfc) {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 1024);
-                        line = reader.readLine();
-                    }
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 1024);
+                    line = reader.readLine();
+
                 }
                 ans.add(line);
                 //reader.close();
@@ -655,11 +654,11 @@ public class OrderSystemImpl implements OrderSystem {
             try {
                 //File file = new File(sortedIndexBlockFiles.get(blockId));
                 byte[] buf = new byte[len];
-                MappedByteBuffer fc = mbbMap.get(sortedIndexBlockFiles.get(blockId));
-                synchronized (fc) {
-                    fc.position((int)offset);
-                    fc.get(buf);
-                }
+                ByteBuffer fc = mbbMap.get(sortedIndexBlockFiles.get(blockId)).slice();
+
+                fc.position((int)offset);
+                fc.get(buf);
+
                 long[] ls = Utils.byteArrayToLongArray(buf);
                 List<Tuple<Long, Long>> r = new ArrayList<>();
                 for (int i = 0; i < ls.length; i += 4) {
@@ -678,12 +677,11 @@ public class OrderSystemImpl implements OrderSystem {
                     Tuple<String, Long> cacheKey = new Tuple<String, Long>(rawFilename, rawOffset);
                     String line = null;
                     if (line == null) {
-                        MappedByteBuffer rfc = mbbMap.get(rawFilename);
+                        ByteBuffer rfc = mbbMap.get(rawFilename).slice();
 
-                        synchronized (rfc) {
-                            BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 1024);
-                            line = reader.readLine();
-                        }
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 1024);
+                        line = reader.readLine();
+
                     }
                     ans.add(line);
 
