@@ -24,7 +24,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     private Map<String, MappedByteBuffer> mbbMap = new HashMap<>(10000);
 
-    private LRUCache<Tuple<String, Long>, String> rawFilesCache = new LRUCache<>(100000);
+    private LRUCache<Tuple<String, Long>, String> rawFilesCache = new LRUCache<>(10000);
 
     static final int orderBlockNum = 150;
     static final int buyerBlockNum = 20;
@@ -675,7 +675,7 @@ public class OrderSystemImpl implements OrderSystem {
                 for (Tuple<Long, Long> item : r) {
                     long fileId = item.x;
                     long rawOffset = item.y;
-                    
+
                     String rawFilename = orderFileIdMapperRev.get((int) fileId);
                     Tuple<String, Long> cacheKey = new Tuple<String, Long>(rawFilename, rawOffset);
                     String line = rawFilesCache.get(cacheKey);

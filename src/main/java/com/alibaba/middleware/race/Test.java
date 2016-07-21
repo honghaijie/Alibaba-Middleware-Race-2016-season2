@@ -33,7 +33,7 @@ public class Test {
         }
 */
 
-        Iterator<OrderSystem.Result> ans = osi.queryOrdersBySaler("", "al-bba5-9856daeafce1", Arrays.asList(""));
+        Iterator<OrderSystem.Result> ans = Arrays.asList(osi.queryOrder(623544604L, Arrays.asList("a_g_764"))).iterator();
         while (ans.hasNext()) {
             OrderSystem.Result r = ans.next();
             for (OrderSystem.KeyValue k : r.getAll()) {
