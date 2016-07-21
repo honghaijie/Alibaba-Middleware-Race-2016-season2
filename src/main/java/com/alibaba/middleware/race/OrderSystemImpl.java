@@ -24,7 +24,6 @@ public class OrderSystemImpl implements OrderSystem {
 
     private Map<String, MappedByteBuffer> mbbMap = new HashMap<>(10000);
 
-    private LRUCache<Tuple<String, Long>, String> rawFilesCache = new LRUCache<>(10000);
 
     static final int orderBlockNum = 150;
     static final int buyerBlockNum = 20;
@@ -610,7 +609,7 @@ public class OrderSystemImpl implements OrderSystem {
                 */
                 String rawFilename = fileIdMapperRev.get((int) fileId);
                 Tuple<String, Long> cacheKey = new Tuple<String, Long>(rawFilename, rawOffset);
-                String line = rawFilesCache.get(cacheKey);
+                String line = null;
                 if (line == null) {
                     MappedByteBuffer rfc = mbbMap.get(rawFilename);
 
@@ -620,7 +619,6 @@ public class OrderSystemImpl implements OrderSystem {
                     }
                 }
                 ans.add(line);
-                rawFilesCache.put(new Tuple<String, Long>(rawFilename, rawOffset), line);
                 //reader.close();
             }
             return ans;
@@ -678,7 +676,7 @@ public class OrderSystemImpl implements OrderSystem {
 
                     String rawFilename = orderFileIdMapperRev.get((int) fileId);
                     Tuple<String, Long> cacheKey = new Tuple<String, Long>(rawFilename, rawOffset);
-                    String line = rawFilesCache.get(cacheKey);
+                    String line = null;
                     if (line == null) {
                         MappedByteBuffer rfc = mbbMap.get(rawFilename);
 
@@ -688,7 +686,6 @@ public class OrderSystemImpl implements OrderSystem {
                         }
                     }
                     ans.add(line);
-                    rawFilesCache.put(new Tuple<String, Long>(rawFilename, rawOffset), line);
 
                 }
 
