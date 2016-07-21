@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a370b311-5746-4b52-a5bb-4cc4c089aeab" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="order-system.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -29,14 +27,17 @@
       <file leaf-file-name="OrderSystemImpl.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.77474403">
-              <caret line="566" column="23" selection-start-line="566" selection-start-column="23" selection-end-line="566" selection-end-column="23" />
+            <state vertical-scroll-proportion="-1.2150171">
+              <caret line="578" column="59" selection-start-line="578" selection-start-column="59" selection-end-line="578" selection-end-column="59" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#418#435#0" expanded="true" />
-                <element signature="e#506#523#0" expanded="true" />
-                <element signature="e#591#608#0" expanded="true" />
-                <element signature="method#ExtractBuyerOffset#0;class#OrderSystemImpl#0" expanded="false" />
+                <element signature="e#514#531#0" expanded="true" />
+                <element signature="e#602#619#0" expanded="true" />
+                <element signature="e#687#704#0" expanded="true" />
+                <element signature="e#36984#37381#0" expanded="true" />
+                <element signature="e#37380#37381#0" expanded="true" />
+                <element signature="e#39171#39561#0" expanded="true" />
+                <element signature="e#39560#39561#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -557,7 +558,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -567,7 +568,7 @@
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32936078" sideWeight="0.49791014" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32936078" sideWeight="0.49791014" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24895833" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -597,7 +598,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="148" />
+      <option name="time" value="149" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="Application">
@@ -606,6 +607,8 @@
         <watch expression="buyerBlockMapper.subMap(buyerIndexEntryLowerBound, buyerIndexEntryUpperBound).values()" language="JAVA" custom="" />
         <watch expression="&quot;/disk2/asd&quot;.split(&quot;/&quot;)[1]" language="JAVA" custom="" />
         <watch expression="orderFilesGroupByDisk" language="JAVA" custom="" />
+        <watch expression="buf.isLoaded()" language="JAVA" custom="" />
+        <watch expression="buf.load()" language="JAVA" custom="" />
       </configuration>
     </watches-manager>
   </component>
@@ -984,14 +987,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.77474403">
-          <caret line="566" column="23" selection-start-line="566" selection-start-column="23" selection-end-line="566" selection-end-column="23" />
+        <state vertical-scroll-proportion="-1.2150171">
+          <caret line="578" column="59" selection-start-line="578" selection-start-column="59" selection-end-line="578" selection-end-column="59" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#418#435#0" expanded="true" />
-            <element signature="e#506#523#0" expanded="true" />
-            <element signature="e#591#608#0" expanded="true" />
-            <element signature="method#ExtractBuyerOffset#0;class#OrderSystemImpl#0" expanded="false" />
+            <element signature="e#514#531#0" expanded="true" />
+            <element signature="e#602#619#0" expanded="true" />
+            <element signature="e#687#704#0" expanded="true" />
+            <element signature="e#36984#37381#0" expanded="true" />
+            <element signature="e#37380#37381#0" expanded="true" />
+            <element signature="e#39171#39561#0" expanded="true" />
+            <element signature="e#39560#39561#0" expanded="true" />
           </folding>
         </state>
       </provider>
