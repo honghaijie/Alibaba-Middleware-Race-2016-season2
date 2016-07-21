@@ -1,18 +1,12 @@
 package com.alibaba.middleware.race;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.KeyException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Semaphore;
 
 /**
  * Created by hahong on 2016/6/13.
@@ -30,13 +24,16 @@ public class OrderSystemImpl implements OrderSystem {
 
     private Map<String, MappedByteBuffer> mbbMap = new HashMap<>(10000);
 
-    static final int orderBlockNum = 4;
-    static final int buyerBlockNum = 2;
-    static final int goodBlockNum = 2;
+    static final int orderBlockNum = 150;
+    static final int buyerBlockNum = 20;
+    static final int goodBlockNum = 20;
     static final int bufferSize = 64 * 1024;
-    static final int memoryOrderIndexSize = 1000;
-    static final int memoryGoodIndexSize = 100;
-    static final int memoryBuyerIndexSize = 100;
+    static final int memoryOrderOrderIndexSize = 10000000;
+    static final int memoryOrderGoodIndexSize = 1000000;
+    static final int memoryOrderBuyerIndexSize = 10000000;
+
+    static final int memoryBuyerBuyerIndexSize = 1000000;
+    static final int memoryGoodGoodIndexSize = 1000000;
 
     List<String> unSortedOrderOrderIndexBlockFiles = new ArrayList<String>();
     List<String> sortedOrderOrderIndexBlockFiles = new ArrayList<String>();
@@ -504,19 +501,24 @@ public class OrderSystemImpl implements OrderSystem {
         for (BufferedOutputStream s : goodGoodIndexBlockFilesOutputStreamMapper.values()) {
             s.close();
         }
-        long orderOrderRatio = orderEntriesCount / memoryOrderIndexSize;
+        long orderOrderRatio = orderEntriesCount / memoryOrderOrderIndexSize;
+        if (orderOrderRatio == 0) orderOrderRatio = 1;
         orderGoodIndexOffset.putAll(SortOffset(unSortedOrderGoodIndexBlockFiles, sortedOrderGoodIndexBlockFiles, orderOrderRatio));
 
-        long orderGoodRatio = goodEntriesCount / memoryGoodIndexSize;
+        long orderGoodRatio = goodEntriesCount / memoryOrderGoodIndexSize;
+        if (orderGoodRatio == 0) orderGoodRatio = 1;
         orderOrderIndexOffset.putAll(SortOffset(unSortedOrderOrderIndexBlockFiles, sortedOrderOrderIndexBlockFiles, orderGoodRatio));
 
-        long orderBuyerRatio = orderEntriesCount / memoryBuyerIndexSize;
+        long orderBuyerRatio = orderEntriesCount / memoryOrderBuyerIndexSize;
+        if (orderBuyerRatio == 0) orderBuyerRatio = 1;
         orderBuyerIndexOffset.putAll(SortBuyerOffset(unSortedOrderBuyerIndexBlockFiles, sortedOrderBuyerIndexBlockFiles, orderBuyerRatio));
 
-        long buyerBuyerRatio = buyerEntriesCount / memoryBuyerIndexSize;
+        long buyerBuyerRatio = buyerEntriesCount / memoryBuyerBuyerIndexSize;
+        if (buyerBuyerRatio == 0) buyerBuyerRatio = 1;
         buyerBuyerIndexOffset.putAll(SortOffset(unSortedBuyerBuyerIndexBlockFiles, sortedBuyerBuyerIndexBlockFiles, buyerBuyerRatio));
 
-        long goodGoodRatio = orderEntriesCount / memoryGoodIndexSize;
+        long goodGoodRatio = orderEntriesCount / memoryGoodGoodIndexSize;
+        if (goodGoodRatio == 0) goodGoodRatio = 1;
         goodGoodIndexOffset.putAll(SortOffset(unSortedGoodGoodIndexBlockFiles, sortedGoodGoodIndexBlockFiles, goodGoodRatio));
 
         for (String path : sortedOrderOrderIndexBlockFiles) {
