@@ -527,31 +527,45 @@ public class OrderSystemImpl implements OrderSystem {
         }
         for (String path : sortedOrderBuyerIndexBlockFiles) {
             FileChannel fc = FileChannel.open(Paths.get(path));
-            mbbMap.put(path, fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size()));
+            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            buf.load();
+            mbbMap.put(path, buf);
         }
         for (String path : sortedOrderGoodIndexBlockFiles) {
             FileChannel fc = FileChannel.open(Paths.get(path));
-            mbbMap.put(path, fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size()));
+            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            buf.load();
+            mbbMap.put(path, buf);
         }
         for (String path : sortedBuyerBuyerIndexBlockFiles) {
             FileChannel fc = FileChannel.open(Paths.get(path));
-            mbbMap.put(path, fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size()));
+            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            buf.load();
+            mbbMap.put(path, buf);
         }
         for (String path : sortedGoodGoodIndexBlockFiles) {
             FileChannel fc = FileChannel.open(Paths.get(path));
-            mbbMap.put(path, fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size()));
+            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            buf.load();
+            mbbMap.put(path, buf);
         }
         for (String path : orderFileIdMapper.keySet()) {
             FileChannel fc = FileChannel.open(Paths.get(path));
-            mbbMap.put(path, fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size()));
+            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            buf.load();
+            mbbMap.put(path, buf);
         }
         for (String path : buyerFileIdMapper.keySet()) {
             FileChannel fc = FileChannel.open(Paths.get(path));
-            mbbMap.put(path, fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size()));
+            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            buf.load();
+            mbbMap.put(path, buf);
         }
         for (String path : goodFileIdMapper.keySet()) {
             FileChannel fc = FileChannel.open(Paths.get(path));
-            mbbMap.put(path, fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size()));
+            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            buf.load();
+            mbbMap.put(path, buf);
         }
     }
     private List<String> QueryEntryById(long id, long blockNum, Map<String, TreeMap<Long, Long>> indexOffset, List<String> sortedIndexBlockFiles, Map<Integer, String> fileIdMapperRev) {
@@ -592,7 +606,7 @@ public class OrderSystemImpl implements OrderSystem {
                 */
                 MappedByteBuffer rfc = mbbMap.get(fileIdMapperRev.get((int) fileId));
                 synchronized (rfc) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int)rawOffset), "UTF-8"), 64);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int)rawOffset), "UTF-8"), 128);
                     ans.add(reader.readLine());
                 }
                 //reader.close();
@@ -652,7 +666,7 @@ public class OrderSystemImpl implements OrderSystem {
 
                     MappedByteBuffer rfc = mbbMap.get(orderFileIdMapperRev.get((int) fileId));
                     synchronized (rfc) {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int)rawOffset), "UTF-8"), 64);
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int)rawOffset), "UTF-8"), 128);
                         ans.add(reader.readLine());
                     }
 
