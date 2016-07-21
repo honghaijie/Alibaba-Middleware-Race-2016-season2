@@ -153,4 +153,12 @@ public class Utils {
         h = Math.abs(h);
         return h;
     }
+    public static long ZipFileIdAndOffset(long fileId, long offset) {
+        return (fileId << 45) + offset;
+    }
+    public static Tuple<Long, Long> UnZipFileIdAndOffset(long m) {
+        long a = m >> 45;
+        long b = m - (a << 45);
+        return new Tuple<>(a, b);
+    }
 }

@@ -149,8 +149,9 @@ public class OrderSystemImpl implements OrderSystem {
                 BufferedOutputStream bos = goodGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath);
                 synchronized (bos) {
                     bos.write(Utils.longToBytes(goodIdHashVal));
-                    bos.write(Utils.longToBytes(goodFileIdMapper.get(filename)));
-                    bos.write(Utils.longToBytes(offset));
+                    bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(goodFileIdMapper.get(filename), offset)));
+                    //bos.write(Utils.longToBytes(goodFileIdMapper.get(filename)));
+                    //bos.write(Utils.longToBytes(offset));
                 }
                 offset += (line + "\n").getBytes(StandardCharsets.UTF_8).length;
                 ++total;
@@ -185,8 +186,9 @@ public class OrderSystemImpl implements OrderSystem {
                 BufferedOutputStream bos = buyerBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath);
                 synchronized (bos) {
                     bos.write(Utils.longToBytes(buyerIdHashVal));
-                    bos.write(Utils.longToBytes(buyerFileIdMapper.get(filename)));
-                    bos.write(Utils.longToBytes(offset));
+                    //bos.write(Utils.longToBytes(buyerFileIdMapper.get(filename)));
+                    //bos.write(Utils.longToBytes(offset));
+                    bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(buyerFileIdMapper.get(filename), offset)));
                 }
                 offset += (line + "\n").getBytes(StandardCharsets.UTF_8).length;
                 ++total;
@@ -224,8 +226,9 @@ public class OrderSystemImpl implements OrderSystem {
                 BufferedOutputStream bos = orderOrderIndexBlockFilesOutputStreamMapper.get(orderIndexPath);
                 synchronized (bos) {
                     bos.write(Utils.longToBytes(orderId));
-                    bos.write(Utils.longToBytes(orderFileIdMapper.get(filename)));
-                    bos.write(Utils.longToBytes(offset));
+                    //bos.write(Utils.longToBytes(orderFileIdMapper.get(filename)));
+                    //bos.write(Utils.longToBytes(offset));
+                    bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(orderFileIdMapper.get(filename), offset)));
                 }
 
                 long goodHashVal = Utils.hash(goodid);
@@ -234,8 +237,9 @@ public class OrderSystemImpl implements OrderSystem {
                 bos = orderGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath);
                 synchronized (bos) {
                     bos.write(Utils.longToBytes(goodHashVal));
-                    bos.write(Utils.longToBytes(orderFileIdMapper.get(filename)));
-                    bos.write(Utils.longToBytes(offset));
+                    //bos.write(Utils.longToBytes(orderFileIdMapper.get(filename)));
+                    //bos.write(Utils.longToBytes(offset));
+                    bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(orderFileIdMapper.get(filename), offset)));
                 }
 
                 long buyerHashVal = Utils.hash(buyerid);
@@ -246,8 +250,9 @@ public class OrderSystemImpl implements OrderSystem {
                 synchronized (bos) {
                     bos.write(Utils.longToBytes(buyerHashVal));
                     bos.write(Utils.longToBytes(createtime));
-                    bos.write(Utils.longToBytes(orderFileIdMapper.get(filename)));
-                    bos.write(Utils.longToBytes(offset));
+                    //bos.write(Utils.longToBytes(orderFileIdMapper.get(filename)));
+                    //bos.write(Utils.longToBytes(offset));
+                    bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(orderFileIdMapper.get(filename), offset)));
                 }
 
 
@@ -266,21 +271,21 @@ public class OrderSystemImpl implements OrderSystem {
             String orderedFilename = orderedFiles.get(i);
             File file = new File(unOrderedFilename);
             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file), bufferSize);
-            int entryLength = 24;
+            int entryLength = 16;
             long offset = 0;
             //Map<Long, Tuple<Long, Long>> indexMapper = new TreeMap<Long, Tuple<Long, Long>>();
-            List<Tuple<Long, Tuple<Long, Long>>> indexList = new ArrayList<>();
+            List<Tuple<Long, Long>> indexList = new ArrayList<>();
             while (true) {
                 byte[] entryBytes = new byte[entryLength];
                 int len = bis.read(entryBytes);
                 if (len == -1) break;
                 long[] e = Utils.byteArrayToLongArray(entryBytes);
-                indexList.add(new Tuple<Long, Tuple<Long, Long>>(e[0], new Tuple<Long, Long>(e[1], e[2])));
+                indexList.add(new Tuple<Long, Long>(e[0], e[1]));
             }
             bis.close();
-            Collections.sort(indexList, new Comparator<Tuple<Long, Tuple<Long, Long>>>() {
+            Collections.sort(indexList, new Comparator<Tuple<Long, Long>>() {
                 @Override
-                public int compare(Tuple<Long, Tuple<Long, Long>> o1, Tuple<Long, Tuple<Long, Long>> o2) {
+                public int compare(Tuple<Long, Long> o1, Tuple<Long, Long> o2) {
                     return o1.x.compareTo(o2.x);
                 }
             });
@@ -288,11 +293,10 @@ public class OrderSystemImpl implements OrderSystem {
             BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(orderedFilename), bufferSize);
             int cnt = 0;
             for (int idx = 0; idx < indexList.size(); ++idx) {
-                Tuple<Long, Tuple<Long, Long>> e = indexList.get(idx);
+                Tuple<Long, Long> e = indexList.get(idx);
 
                 fos.write(Utils.longToBytes(e.x));
-                fos.write(Utils.longToBytes(e.y.x));
-                fos.write(Utils.longToBytes(e.y.y));
+                fos.write(Utils.longToBytes(e.y));
                 if (idx == 0 || !indexList.get(idx - 1).x.equals(e.x)) {
                     ++cnt;
                     if (cnt % ratio == 0) {
@@ -316,16 +320,16 @@ public class OrderSystemImpl implements OrderSystem {
             String orderedFilename = orderedFiles.get(i);
             File file = new File(unOrderedFilename);
             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file), bufferSize);
-            int entryLength = 32;
+            int entryLength = 24;
             long offset = 0;
             //Map<Long, Tuple<Long, Long>> indexMapper = new TreeMap<Long, Tuple<Long, Long>>();
-            List<Tuple<Tuple<Long, Long>, Tuple<Long, Long>>> indexList = new ArrayList<>();
+            List<Tuple<Tuple<Long, Long>, Long>> indexList = new ArrayList<>();
             while (true) {
                 byte[] entryBytes = new byte[entryLength];
                 int len = bis.read(entryBytes);
                 if (len == -1) break;
                 long[] e = Utils.byteArrayToLongArray(entryBytes);
-                indexList.add(new Tuple<Tuple<Long, Long>, Tuple<Long, Long>>(new Tuple<Long, Long>(e[0], e[1]), new Tuple<Long, Long>(e[2], e[3])));
+                indexList.add(new Tuple<Tuple<Long, Long>, Long>(new Tuple<Long, Long>(e[0], e[1]), e[2]));
 
             }
             bis.close();
@@ -334,12 +338,11 @@ public class OrderSystemImpl implements OrderSystem {
             BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(orderedFilename), bufferSize);
             int cnt = 0;
             for (int idx = 0; idx < indexList.size(); ++idx) {
-                Tuple<Tuple<Long, Long>, Tuple<Long, Long>> e = indexList.get(idx);
+                Tuple<Tuple<Long, Long>, Long> e = indexList.get(idx);
 
                 fos.write(Utils.longToBytes(e.x.x));
                 fos.write(Utils.longToBytes(e.x.y));
-                fos.write(Utils.longToBytes(e.y.x));
-                fos.write(Utils.longToBytes(e.y.y));
+                fos.write(Utils.longToBytes(e.y));
                 ++cnt;
                 if (cnt % ratio == 0) {
                     currentMap.put(e.x, offset);
@@ -597,10 +600,11 @@ public class OrderSystemImpl implements OrderSystem {
 
             long[] ls = Utils.byteArrayToLongArray(buf);
             List<Tuple<Long, Long>> r = new ArrayList<>();
-            for (int i = 0; i < ls.length; i += 3) {
+            for (int i = 0; i < ls.length; i += 2) {
                 if (ls[i] == id) {
-                    long fileId = ls[i + 1];
-                    long rawOffset = ls[i + 2];
+                    Tuple<Long, Long> tp = Utils.UnZipFileIdAndOffset(ls[i + 1]);
+                    long fileId = tp.x;
+                    long rawOffset = tp.y;
                     r.add(new Tuple<Long, Long>(fileId, rawOffset));
                 }
             }
@@ -670,10 +674,11 @@ public class OrderSystemImpl implements OrderSystem {
 
                 long[] ls = Utils.byteArrayToLongArray(buf);
                 List<Tuple<Long, Long>> r = new ArrayList<>();
-                for (int i = 0; i < ls.length; i += 4) {
+                for (int i = 0; i < ls.length; i += 3) {
                     if (ls[i] == buyerHashVal && ls[i + 1] >= from && ls[i + 1] < to) {
-                        long fileId = ls[i + 2];
-                        long rawOffset = ls[i + 3];
+                        Tuple<Long, Long> tp = Utils.UnZipFileIdAndOffset(ls[i + 2]);
+                        long fileId = tp.x;
+                        long rawOffset = tp.y;
                         r.add(new Tuple<Long, Long>(fileId, rawOffset));
                     }
                 }
