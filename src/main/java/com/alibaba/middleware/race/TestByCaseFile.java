@@ -53,6 +53,8 @@ public class TestByCaseFile {
         OrderSystemImpl osi = new OrderSystemImpl();
 
         osi.construct(orderFiles, buyerFiles, goodFiles, storeFolders);
+        System.out.printf("Construction complete, time: %dms\n", System.currentTimeMillis() - beginTime);
+        beginTime = System.currentTimeMillis();
         int cnt = 0;
         String filename = "D:\\middleware-data\\prerun_data\\prerun_data\\case.head.txt";
         try {
@@ -123,6 +125,7 @@ public class TestByCaseFile {
 
                 System.out.printf("Test case %d complete.\n", cnt);
             }
+            System.out.printf("Query complete, time: %dms\n", System.currentTimeMillis() - beginTime);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

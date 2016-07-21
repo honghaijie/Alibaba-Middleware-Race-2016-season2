@@ -126,7 +126,22 @@ public class Utils {
         return bytesToLong(Arrays.copyOf(s, 8));
     }
     public static String GetDisk(String path) {
-        return "D";
+        String[] sp = path.split("/");
+        if (sp.length == 1) return sp[0];
+        return sp[1];
+    }
+    public static List<List<String>> GroupByDisk(List<String> files) {
+        Map<String, List<String>> ans = new HashMap<>();
+        for (String orderFile : files) {
+            String diskTag = Utils.GetDisk(orderFile);
+            List<String> t = ans.get(diskTag);
+            if (t == null) {
+                t = new ArrayList<String>();
+                ans.put(diskTag, t);
+            }
+            t.add(orderFile);
+        }
+        return new ArrayList<>(ans.values());
     }
     public static long hash(String string) {
         long h = 1125899906842597L; // prime

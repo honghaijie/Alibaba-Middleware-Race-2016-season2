@@ -20,7 +20,6 @@ import java.util.concurrent.Semaphore;
 
 
 public class OrderSystemImpl implements OrderSystem {
-    ConcurrentMap<String, Semaphore> diskSem = new ConcurrentHashMap<String, Semaphore>();
 
     private Map<String, Integer> orderFileIdMapper = new TreeMap<String, Integer>();
     private Map<Integer, String> orderFileIdMapperRev = new TreeMap<Integer, String>();
@@ -71,11 +70,11 @@ public class OrderSystemImpl implements OrderSystem {
     TreeMap<Tuple<Long, Long>, Integer> buyerBlockMapper = new TreeMap<>();
 
     Map<String, String> attrToTable = new HashMap<>();
-    long orderEntriesCount = 0;
+    Long orderEntriesCount = 0L;
 
     //WARNING
-    long goodEntriesCount = 0;
-    long buyerEntriesCount = 0;
+    Long goodEntriesCount = 0L;
+    Long buyerEntriesCount = 0L;
 
     public OrderSystemImpl() {
 
@@ -125,10 +124,6 @@ public class OrderSystemImpl implements OrderSystem {
 
     private long ExtractGoodOffset(List<String> goodFiles) throws IOException, KeyException, InterruptedException {
         int total = 0;
-        String diskTag = Utils.GetDisk(goodFiles.get(0));
-        if (!diskSem.containsKey(diskTag)) {
-            diskSem.put(diskTag, new Semaphore(1));
-        }
         for (int goodFileId = 0; goodFileId < goodFiles.size(); ++goodFileId) {
             String filename = goodFiles.get(goodFileId);
             File file = new File(filename);
@@ -137,9 +132,7 @@ public class OrderSystemImpl implements OrderSystem {
             String line;
             long offset = 0;
             while (true) {
-                diskSem.get(diskTag).acquire();
                 line = reader.readLine();
-                diskSem.get(diskTag).release();
 
                 if (line == null) break;
                 Map<String, String> attr = Utils.ParseEntryStrToMap(line);
@@ -151,14 +144,13 @@ public class OrderSystemImpl implements OrderSystem {
 
                 int goodBlockId = (int)(goodIdHashVal % goodBlockNum);
                 String goodIndexPath = unSortedGoodGoodIndexBlockFiles.get(goodBlockId);
-                String goodIndexDiskTag = Utils.GetDisk(goodIndexPath);
-                diskSem.get(goodIndexDiskTag).acquire();
-                BufferedOutputStream bos = goodGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath);
-                bos.write(Utils.longToBytes(goodIdHashVal));
-                bos.write(Utils.longToBytes(goodFileIdMapper.get(filename)));
-                bos.write(Utils.longToBytes(offset));
-                diskSem.get(goodIndexDiskTag).release();
 
+                BufferedOutputStream bos = goodGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath);
+                synchronized (bos) {
+                    bos.write(Utils.longToBytes(goodIdHashVal));
+                    bos.write(Utils.longToBytes(goodFileIdMapper.get(filename)));
+                    bos.write(Utils.longToBytes(offset));
+                }
                 offset += (line + "\n").getBytes(StandardCharsets.UTF_8).length;
                 ++total;
             }
@@ -168,10 +160,6 @@ public class OrderSystemImpl implements OrderSystem {
     }
     private long ExtractBuyerOffset(List<String> buyerFiles) throws IOException, KeyException, InterruptedException {
         int total = 0;
-        String diskTag = Utils.GetDisk(buyerFiles.get(0));
-        if (!diskSem.containsKey(diskTag)) {
-            diskSem.put(diskTag, new Semaphore(1));
-        }
         for (int buyerFileId = 0; buyerFileId < buyerFiles.size(); ++buyerFileId) {
             String filename = buyerFiles.get(buyerFileId);
             File file = new File(filename);
@@ -180,9 +168,7 @@ public class OrderSystemImpl implements OrderSystem {
             String line;
             long offset = 0;
             while (true) {
-                diskSem.get(diskTag).acquire();
                 line = reader.readLine();
-                diskSem.get(diskTag).release();
 
                 if (line == null) break;
                 Map<String, String> attr = Utils.ParseEntryStrToMap(line);
@@ -194,14 +180,13 @@ public class OrderSystemImpl implements OrderSystem {
 
                 int buyerBlockId = (int)(buyerIdHashVal % buyerBlockNum);
                 String buyerIndexPath = unSortedBuyerBuyerIndexBlockFiles.get(buyerBlockId);
-                String buyerIndexDiskTag = Utils.GetDisk(buyerIndexPath);
-                diskSem.get(buyerIndexDiskTag).acquire();
-                BufferedOutputStream bos = buyerBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath);
-                bos.write(Utils.longToBytes(buyerIdHashVal));
-                bos.write(Utils.longToBytes(buyerFileIdMapper.get(filename)));
-                bos.write(Utils.longToBytes(offset));
-                diskSem.get(buyerIndexDiskTag).release();
 
+                BufferedOutputStream bos = buyerBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath);
+                synchronized (bos) {
+                    bos.write(Utils.longToBytes(buyerIdHashVal));
+                    bos.write(Utils.longToBytes(buyerFileIdMapper.get(filename)));
+                    bos.write(Utils.longToBytes(offset));
+                }
                 offset += (line + "\n").getBytes(StandardCharsets.UTF_8).length;
                 ++total;
             }
@@ -212,10 +197,6 @@ public class OrderSystemImpl implements OrderSystem {
 
     private long ExtractOrderOffset(List<String> orderFiles) throws IOException, KeyException, InterruptedException {
         int total = 0;
-        String diskTag = Utils.GetDisk(orderFiles.get(0));
-        if (!diskSem.containsKey(diskTag)) {
-            diskSem.put(diskTag, new Semaphore(1));
-        }
         for (int orderFileId = 0; orderFileId < orderFiles.size(); ++orderFileId) {
             String filename = orderFiles.get(orderFileId);
             File file = new File(filename);
@@ -224,9 +205,7 @@ public class OrderSystemImpl implements OrderSystem {
             String line;
             long offset = 0;
             while (true) {
-                diskSem.get(diskTag).acquire();
                 line = reader.readLine();
-                diskSem.get(diskTag).release();
 
                 if (line == null) break;
                 Map<String, String> attr = Utils.ParseEntryStrToMap(line);
@@ -238,40 +217,37 @@ public class OrderSystemImpl implements OrderSystem {
                 String buyerid = attr.get("buyerid");
                 long createtime = Long.parseLong(attr.get("createtime"));
 
-                if (orderId == 624813187L) {
-                    int zzz = 1;
-                }
 
                 int orderBlockId = (int)(orderId % orderBlockNum);
                 String orderIndexPath = unSortedOrderOrderIndexBlockFiles.get(orderBlockId);
-                String orderIndexDiskTag = Utils.GetDisk(orderIndexPath);
-                diskSem.get(orderIndexDiskTag).acquire();
-                orderOrderIndexBlockFilesOutputStreamMapper.get(orderIndexPath).write(Utils.longToBytes(orderId));
-                orderOrderIndexBlockFilesOutputStreamMapper.get(orderIndexPath).write(Utils.longToBytes(orderFileIdMapper.get(filename)));
-                orderOrderIndexBlockFilesOutputStreamMapper.get(orderIndexPath).write(Utils.longToBytes(offset));
-                diskSem.get(orderIndexDiskTag).release();
+                BufferedOutputStream bos = orderOrderIndexBlockFilesOutputStreamMapper.get(orderIndexPath);
+                synchronized (bos) {
+                    bos.write(Utils.longToBytes(orderId));
+                    bos.write(Utils.longToBytes(orderFileIdMapper.get(filename)));
+                    bos.write(Utils.longToBytes(offset));
+                }
 
                 long goodHashVal = Utils.hash(goodid);
                 int goodBlockId = (int)((goodHashVal) % orderBlockNum);
                 String goodIndexPath = unSortedOrderGoodIndexBlockFiles.get(goodBlockId);
-                String goodIndexDiskTag = Utils.GetDisk(goodIndexPath);
-                diskSem.get(goodIndexDiskTag).acquire();
-                orderGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath).write(Utils.longToBytes(goodHashVal));
-                orderGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath).write(Utils.longToBytes(orderFileIdMapper.get(filename)));
-                orderGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath).write(Utils.longToBytes(offset));
-                diskSem.get(goodIndexDiskTag).release();
+                bos = orderGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath);
+                synchronized (bos) {
+                    bos.write(Utils.longToBytes(goodHashVal));
+                    bos.write(Utils.longToBytes(orderFileIdMapper.get(filename)));
+                    bos.write(Utils.longToBytes(offset));
+                }
 
                 long buyerHashVal = Utils.hash(buyerid);
                 Tuple<Long, Long> buyerIndexEntry = new Tuple<>(buyerHashVal, createtime);
                 int buyerBlockId = buyerBlockMapper.floorEntry(buyerIndexEntry).getValue();
                 String buyerIndexPath = unSortedOrderBuyerIndexBlockFiles.get(buyerBlockId);
-                String buyerIndexDiskTag = Utils.GetDisk(buyerIndexPath);
-                diskSem.get(buyerIndexDiskTag).acquire();
-                orderBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath).write(Utils.longToBytes(buyerHashVal));
-                orderBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath).write(Utils.longToBytes(createtime));
-                orderBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath).write(Utils.longToBytes(orderFileIdMapper.get(filename)));
-                orderBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath).write(Utils.longToBytes(offset));
-                diskSem.get(buyerIndexDiskTag).release();
+                bos = orderBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath);
+                synchronized (bos) {
+                    bos.write(Utils.longToBytes(buyerHashVal));
+                    bos.write(Utils.longToBytes(createtime));
+                    bos.write(Utils.longToBytes(orderFileIdMapper.get(filename)));
+                    bos.write(Utils.longToBytes(offset));
+                }
 
 
 
@@ -443,10 +419,76 @@ public class OrderSystemImpl implements OrderSystem {
             sortedGoodGoodIndexBlockFiles.add(sortedGoodPath);
             goodGoodIndexBlockFilesOutputStreamMapper.put(unSortedGoodPath, new BufferedOutputStream(new FileOutputStream(unSortedGoodPath), bufferSize));
         }
+        final List<List<String>> orderFilesGroupByDisk = Utils.GroupByDisk(orderFiles);
+        final List<List<String>> goodFilesGroupByDisk = Utils.GroupByDisk(goodFiles);
+        final List<List<String>> buyerFilesGroupByDisk = Utils.GroupByDisk(buyerFiles);
+        Thread[] t1 = new Thread[orderFilesGroupByDisk.size()];
+        Thread[] t2 = new Thread[goodFilesGroupByDisk.size()];
+        Thread[] t3 = new Thread[buyerFilesGroupByDisk.size()];
+        for (int i = 0; i < t1.length; ++i) {
+            final int v = i;
+            Thread t = new Thread() {
+                public void run() {
+                    try {
+                        long cnt = ExtractOrderOffset(orderFilesGroupByDisk.get(v));
+                        synchronized (orderEntriesCount) {
+                            orderEntriesCount += cnt;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            t.start();
+            t1[i] = t;
+        }
+        for (int i = 0; i < t1.length; ++i) {
+            t1[i].join();
+        }
+        for (int i = 0; i < t2.length; ++i) {
+            final int v = i;
+            Thread t = new Thread() {
+                public void run() {
+                    try {
+                        long cnt = ExtractGoodOffset(goodFilesGroupByDisk.get(v));
+                        synchronized (goodEntriesCount) {
+                            goodEntriesCount += cnt;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            t.start();
+            t2[i] = t;
+        }
+        for (int i = 0; i < t2.length; ++i) {
+            t2[i].join();
+        }
+        for (int i = 0; i < t3.length; ++i) {
+            final int v = i;
+            Thread t = new Thread() {
+                public void run() {
+                    try {
+                        long cnt = ExtractBuyerOffset(buyerFilesGroupByDisk.get(v));
+                        synchronized (buyerEntriesCount) {
+                            buyerEntriesCount += cnt;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            t.start();
+            t3[i] = t;
+        }
+        for (int i = 0; i < t3.length; ++i) {
+            t3[i].join();
+        }
 
-        orderEntriesCount = ExtractOrderOffset(orderFiles);
-        buyerEntriesCount = ExtractBuyerOffset(buyerFiles);
-        goodEntriesCount = ExtractGoodOffset(goodFiles);
+        //orderEntriesCount = ExtractOrderOffset(orderFiles);
+        //buyerEntriesCount = ExtractBuyerOffset(buyerFiles);
+        //goodEntriesCount = ExtractGoodOffset(goodFiles);
         for (BufferedOutputStream s : orderOrderIndexBlockFilesOutputStreamMapper.values()) {
             s.close();
         }
