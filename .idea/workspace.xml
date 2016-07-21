@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="a370b311-5746-4b52-a5bb-4cc4c089aeab" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="order-system.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -28,8 +27,8 @@
       <file leaf-file-name="OrderSystemImpl.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.36177474">
-              <caret line="594" column="151" selection-start-line="594" selection-start-column="151" selection-end-line="594" selection-end-column="151" />
+            <state vertical-scroll-proportion="0.47440273">
+              <caret line="594" column="150" selection-start-line="594" selection-start-column="150" selection-end-line="594" selection-end-column="150" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#418#435#0" expanded="true" />
@@ -556,7 +555,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -983,8 +982,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.36177474">
-          <caret line="594" column="151" selection-start-line="594" selection-start-column="151" selection-end-line="594" selection-end-column="151" />
+        <state vertical-scroll-proportion="0.47440273">
+          <caret line="594" column="150" selection-start-line="594" selection-start-column="150" selection-end-line="594" selection-end-column="150" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#418#435#0" expanded="true" />
