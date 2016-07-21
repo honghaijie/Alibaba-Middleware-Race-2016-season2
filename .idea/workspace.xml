@@ -27,8 +27,8 @@
       <file leaf-file-name="OrderSystemImpl.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.09897611">
-              <caret line="615" column="152" selection-start-line="615" selection-start-column="152" selection-end-line="615" selection-end-column="152" />
+            <state vertical-scroll-proportion="0.77474403">
+              <caret line="681" column="156" selection-start-line="681" selection-start-column="156" selection-end-line="681" selection-end-column="156" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#446#463#0" expanded="true" />
@@ -1001,8 +1001,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.09897611">
-          <caret line="615" column="152" selection-start-line="615" selection-start-column="152" selection-end-line="615" selection-end-column="152" />
+        <state vertical-scroll-proportion="0.77474403">
+          <caret line="681" column="156" selection-start-line="681" selection-start-column="156" selection-end-line="681" selection-end-column="156" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#446#463#0" expanded="true" />

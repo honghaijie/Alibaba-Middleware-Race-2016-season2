@@ -613,7 +613,7 @@ public class OrderSystemImpl implements OrderSystem {
                 if (line == null) {
                     ByteBuffer rfc = mbbMap.get(rawFilename).slice();
 
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 64);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 32);
                     line = reader.readLine();
 
                 }
@@ -679,7 +679,7 @@ public class OrderSystemImpl implements OrderSystem {
                     if (line == null) {
                         ByteBuffer rfc = mbbMap.get(rawFilename).slice();
 
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 64);
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 32);
                         line = reader.readLine();
 
                     }
