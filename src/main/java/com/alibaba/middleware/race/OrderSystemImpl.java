@@ -592,7 +592,7 @@ public class OrderSystemImpl implements OrderSystem {
                 */
                 MappedByteBuffer rfc = mbbMap.get(fileIdMapperRev.get((int) fileId));
                 synchronized (rfc) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int)rawOffset), "UTF-8"), 256);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int)rawOffset), "UTF-8"), 16);
                     ans.add(reader.readLine());
                 }
                 //reader.close();
