@@ -9,10 +9,10 @@ import java.nio.ByteBuffer;
  */
 public class ByteBufferBackedInputStream extends InputStream {
 
-    ByteBuffer buf;
+    BigMappedByteBuffer buf;
     int cur;
 
-    public ByteBufferBackedInputStream(ByteBuffer buf, int offset) {
+    public ByteBufferBackedInputStream(BigMappedByteBuffer buf, int offset) {
         this.buf = buf;
         buf.position(offset);
         this.cur = 0;
@@ -31,8 +31,11 @@ public class ByteBufferBackedInputStream extends InputStream {
         if (!buf.hasRemaining()) {
             return -1;
         }
-
-        len = Math.min(len, buf.remaining());
+        long remaining = buf.remaining();
+        if (remaining > Integer.MAX_VALUE) {
+            remaining = Integer.MAX_VALUE;
+        }
+        len = Math.min(len, (int)remaining);
         buf.get(bytes, off, len);
         return len;
     }

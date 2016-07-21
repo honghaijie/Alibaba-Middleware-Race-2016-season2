@@ -11,17 +11,21 @@ import java.util.regex.Pattern;
  */
 public class TestByCaseFile {
     public static String[] getKeys(String str) {
+        List<String> r = new ArrayList<>();
         String[] keys = str.replace("KEYS:[", "").replace("]", "").split(",");
         for (int i = 0; i < keys.length; ++i) {
-            keys[i] = keys[i].trim();
+            String s = keys[i].trim();
+            if (!s.equals("")) {
+                r.add(s);
+            }
         }
-        return keys;
+        return r.toArray(new String[r.size()]);
     }
     public static void checkResult(String str, OrderSystem.Result r) {
         Pattern pattern = Pattern.compile("orderid:(\\d+)");
         Matcher matcher = pattern.matcher(str);
         matcher.find();
-        System.out.println(str);
+        //System.out.println(str);
         long orderId = Long.parseLong(matcher.group(1));
         if (r.orderId() != orderId) {
             System.err.printf("Error, key: %s, expected value: %d, actural value: %d\n", "orderid", orderId, r.orderId());
@@ -31,15 +35,19 @@ public class TestByCaseFile {
         matcher.find();
         String kvStr = matcher.group(1);
         String[] kvs = kvStr.split(",");
-        for (String kv : kvs) {
-            String t = kv.trim();
+        try {
+            for (String kv : kvs) {
+                String t = kv.trim();
 
-            if (t.equals("")) continue;
-            String[] tp = t.split(":");
-            String k = tp[0], v = tp[1];
-            if (!r.get(k).valueAsString().replace("+", "").equals(v)) {
-                System.err.printf("Error, key: %s, expected value: %s, actural value: %s\n", k, v, r.get(k).valueAsString());
+                if (t.equals("")) continue;
+                String[] tp = t.split(":");
+                String k = tp[0], v = tp[1];
+                if (!r.get(k).valueAsString().equals(v) && !((Long)r.get(k).valueAsLong()).equals(Long.parseLong(v))) {
+                    System.err.printf("Error, key: %s, expected value: %s, actural value: %s\n", k, v, r.get(k).valueAsString());
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
     public static void main(String args[]) throws IOException, InterruptedException {
@@ -56,22 +64,21 @@ public class TestByCaseFile {
         System.out.printf("Construction complete, time: %dms\n", System.currentTimeMillis() - beginTime);
         beginTime = System.currentTimeMillis();
         int cnt = 0;
-        String filename = "D:\\middleware-data\\prerun_data\\prerun_data\\case.head.txt";
+        String filename = "D:\\middleware-data\\prerun_data\\prerun_data\\case.0";
         try {
 
             FileInputStream fis = new FileInputStream(filename);
             BufferedReader br = new BufferedReader(new InputStreamReader(fis, StandardCharsets.UTF_8));
             while (true) {
                 ++cnt;
-                if (cnt == 6) {
-                    int aaa = 1;
-                }
                 String cs = br.readLine();
                 if (cs == null) break;
                 if (cs.contains("QUERY_ORDER")) {
                     long orderid = Long.parseLong(br.readLine().replace("ORDERID:", ""));
                     String[] keys = getKeys(br.readLine());
-                    OrderSystem.Result r = osi.queryOrder(orderid, Arrays.asList(keys));
+                    List<String> k = Arrays.asList(keys);
+                    if (keys.length != 0 && keys[0].equals("*")) k = null;
+                    OrderSystem.Result r = osi.queryOrder(orderid, k);
                     br.readLine();
                     while (true) {
                         String t = br.readLine();
@@ -99,7 +106,9 @@ public class TestByCaseFile {
                     String salerid = br.readLine().replace("SALERID:", "");
                     String goodid = br.readLine().replace("GOODID:", "");
                     String[] keys = getKeys(br.readLine());
-                    Iterator<OrderSystem.Result> r = osi.queryOrdersBySaler(salerid, goodid, Arrays.asList(keys));
+                    List<String> k = Arrays.asList(keys);
+                    if (keys.length != 0 && keys[0].equals("*")) k = null;
+                    Iterator<OrderSystem.Result> r = osi.queryOrdersBySaler(salerid, goodid, k);
                     br.readLine();
                     while (true) {
                         String t = br.readLine();
@@ -114,8 +123,19 @@ public class TestByCaseFile {
                 } else {
                     String goodid = br.readLine().replace("GOODID:", "");
                     String[] keys = getKeys(br.readLine());
-                    String r = osi.sumOrdersByGood(goodid, keys[0]).valueAsString();
                     String sr = br.readLine().replace("RESULT:", "");
+                    if (sr.contains("null")) {
+                        sr = null;
+                    }
+                    OrderSystem.KeyValue kv = osi.sumOrdersByGood(goodid, keys[0]);
+                    if (sr == null) {
+                        if (kv != null) {
+                            System.err.printf("Error when calculating sum, expected value: null, actural value: %f.\n", kv.valueAsString());
+                        }
+                        br.readLine();
+                        continue;
+                    }
+                    String r = kv.valueAsString();
                     double dr = Double.parseDouble(r), dsr = Double.parseDouble(sr);
                     if (Math.abs(dr - dsr) > 0.0001) {
                         System.err.printf("Error when calculating sum, expected value: %f, actural value: %f.\n", dsr, dr);

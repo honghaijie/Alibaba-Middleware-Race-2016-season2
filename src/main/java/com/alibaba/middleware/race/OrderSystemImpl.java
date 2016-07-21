@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.KeyException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by hahong on 2016/6/13.
@@ -23,7 +25,7 @@ public class OrderSystemImpl implements OrderSystem {
     private Map<String, Integer> goodFileIdMapper = new TreeMap<String, Integer>();
     private Map<Integer, String> goodFileIdMapperRev = new TreeMap<Integer, String>();
 
-    private Map<String, MappedByteBuffer> mbbMap = new HashMap<>(10000);
+    private Map<String, BigMappedByteBuffer> mbbMap = new HashMap<>(10000);
 
 
     static final int orderBlockNum = 15;
@@ -68,7 +70,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     TreeMap<Tuple<Long, Long>, Integer> buyerBlockMapper = new TreeMap<>();
 
-    Map<String, String> attrToTable = new HashMap<>();
+    ConcurrentMap<String, String> attrToTable = new ConcurrentHashMap<>(10000);
     Long orderEntriesCount = 0L;
 
     //WARNING
@@ -524,50 +526,58 @@ public class OrderSystemImpl implements OrderSystem {
         goodGoodIndexOffset.putAll(SortOffset(unSortedGoodGoodIndexBlockFiles, sortedGoodGoodIndexBlockFiles, goodGoodRatio));
 
         for (String path : sortedOrderOrderIndexBlockFiles) {
-            FileChannel fc = FileChannel.open(Paths.get(path));
-            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            //FileChannel fc = FileChannel.open(Paths.get(path));
+            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
             //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : sortedOrderBuyerIndexBlockFiles) {
-            FileChannel fc = FileChannel.open(Paths.get(path));
-            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            //FileChannel fc = FileChannel.open(Paths.get(path));
+            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
             //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : sortedOrderGoodIndexBlockFiles) {
-            FileChannel fc = FileChannel.open(Paths.get(path));
-            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            //FileChannel fc = FileChannel.open(Paths.get(path));
+            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
             //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : sortedBuyerBuyerIndexBlockFiles) {
-            FileChannel fc = FileChannel.open(Paths.get(path));
-            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            //FileChannel fc = FileChannel.open(Paths.get(path));
+            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
             //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : sortedGoodGoodIndexBlockFiles) {
-            FileChannel fc = FileChannel.open(Paths.get(path));
-            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            //FileChannel fc = FileChannel.open(Paths.get(path));
+            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
             //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : orderFileIdMapper.keySet()) {
-            FileChannel fc = FileChannel.open(Paths.get(path));
-            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            //FileChannel fc = FileChannel.open(Paths.get(path));
+            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
             //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : buyerFileIdMapper.keySet()) {
-            FileChannel fc = FileChannel.open(Paths.get(path));
-            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            //FileChannel fc = FileChannel.open(Paths.get(path));
+            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
             //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : goodFileIdMapper.keySet()) {
-            FileChannel fc = FileChannel.open(Paths.get(path));
-            MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            //FileChannel fc = FileChannel.open(Paths.get(path));
+            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
             //buf.load();
             mbbMap.put(path, buf);
         }
@@ -581,7 +591,7 @@ public class OrderSystemImpl implements OrderSystem {
         try {
             byte[] buf = new byte[len];
             //FileChannel fc = FileChannel.open(Paths.get(sortedIndexBlockFiles.get(blockId)));
-            ByteBuffer fc = mbbMap.get(sortedIndexBlockFiles.get(blockId)).slice();
+            BigMappedByteBuffer fc = mbbMap.get(sortedIndexBlockFiles.get(blockId)).slice();
             fc.position((int)offset);
             fc.get(buf);
 
@@ -608,12 +618,11 @@ public class OrderSystemImpl implements OrderSystem {
                 BufferedReader reader = new BufferedReader(isr, 1024);
                 */
                 String rawFilename = fileIdMapperRev.get((int) fileId);
-                Tuple<String, Long> cacheKey = new Tuple<String, Long>(rawFilename, rawOffset);
                 String line = null;
                 if (line == null) {
-                    ByteBuffer rfc = mbbMap.get(rawFilename).slice();
+                    BigMappedByteBuffer rfc = mbbMap.get(rawFilename).slice();
 
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 32);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 64);
                     line = reader.readLine();
 
                 }
@@ -654,7 +663,7 @@ public class OrderSystemImpl implements OrderSystem {
             try {
                 //File file = new File(sortedIndexBlockFiles.get(blockId));
                 byte[] buf = new byte[len];
-                ByteBuffer fc = mbbMap.get(sortedIndexBlockFiles.get(blockId)).slice();
+                BigMappedByteBuffer fc = mbbMap.get(sortedIndexBlockFiles.get(blockId)).slice();
 
                 fc.position((int)offset);
                 fc.get(buf);
@@ -674,12 +683,11 @@ public class OrderSystemImpl implements OrderSystem {
                     long rawOffset = item.y;
 
                     String rawFilename = orderFileIdMapperRev.get((int) fileId);
-                    Tuple<String, Long> cacheKey = new Tuple<String, Long>(rawFilename, rawOffset);
                     String line = null;
                     if (line == null) {
-                        ByteBuffer rfc = mbbMap.get(rawFilename).slice();
+                        BigMappedByteBuffer rfc = mbbMap.get(rawFilename).slice();
 
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 32);
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, (int) rawOffset), "UTF-8"), 64);
                         line = reader.readLine();
 
                     }
