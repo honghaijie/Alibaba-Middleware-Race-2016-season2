@@ -25,9 +25,9 @@ public class OrderSystemImpl implements OrderSystem {
     private Map<String, MappedByteBuffer> mbbMap = new HashMap<>(10000);
 
 
-    static final int orderBlockNum = 150;
-    static final int buyerBlockNum = 20;
-    static final int goodBlockNum = 20;
+    static final int orderBlockNum = 15;
+    static final int buyerBlockNum = 2;
+    static final int goodBlockNum = 2;
     static final int bufferSize = 64 * 1024;
     static final int memoryOrderOrderIndexSize = 10000000;
     static final int memoryOrderGoodIndexSize = 1000000;
