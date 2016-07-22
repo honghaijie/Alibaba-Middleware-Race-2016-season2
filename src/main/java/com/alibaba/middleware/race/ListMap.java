@@ -10,6 +10,22 @@ import java.util.*;
 public class ListMap<K, V> {
     private List<ListMapEntry<K, V>> kvs = new ArrayList<>(10);
 
+    public int size() {
+        return kvs.size();
+    }
+
+    public boolean isEmpty() {
+        return kvs.isEmpty();
+    }
+
+    public boolean containsKey(Object key) {
+        throw new NotImplementedException();
+    }
+
+    public boolean containsValue(Object value) {
+        throw new NotImplementedException();
+    }
+
     public V get(Object key) {
         for (ListMapEntry<K, V> e : kvs) {
             if (e.key.equals(key)) {
@@ -22,10 +38,6 @@ public class ListMap<K, V> {
     public V put(K key, V value) {
         kvs.add(new ListMapEntry(key, value));
         return value;
-    }
-
-    public void putAll(ListMap<K, V> m) {
-        kvs.addAll(m.kvs);
     }
 
     public Collection<ListMapEntry<K, V>> entrySet() {

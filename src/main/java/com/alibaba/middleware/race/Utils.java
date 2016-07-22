@@ -99,7 +99,6 @@ public class Utils {
         bw.close();
     }
     public static Map<String, String> ParseEntryStrToMap(String s) {
-        String[] fields = s.split("\t");
         HashMap<String, String> ans = new HashMap<String, String>();
         int from = 0;
         while (true) {
