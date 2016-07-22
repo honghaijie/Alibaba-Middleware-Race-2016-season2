@@ -99,7 +99,7 @@ public class OrderSystemImpl implements OrderSystem {
                     if (t == null) {
                         continue;
                     }
-                    ListMap<String, String> attr = Utils.ParseEntryStrToMap(t);
+                    Map<String, String> attr = Utils.ParseEntryStrToMap(t);
                     long buyerHash = Utils.hash(attr.get("buyerid"));
                     long createTime = Long.parseLong(attr.get("createtime"));
                     ans.add(new Tuple<Long, Long>(buyerHash, createTime));
@@ -130,10 +130,10 @@ public class OrderSystemImpl implements OrderSystem {
                 line = reader.readLine();
 
                 if (line == null) break;
-                ListMap<String, String> attr = Utils.ParseEntryStrToMap(line);
+                Map<String, String> attr = Utils.ParseEntryStrToMap(line);
                 String goodid = attr.get("goodid");
-                for (ListMapEntry<String, String> t : attr.entrySet()) {
-                    attrToTable.put(t.key, Config.GoodTable);
+                for (Map.Entry<String, String> t : attr.entrySet()) {
+                    attrToTable.put(t.getKey(), Config.GoodTable);
                 }
                 long goodIdHashVal = Utils.hash(goodid);
 
@@ -165,9 +165,9 @@ public class OrderSystemImpl implements OrderSystem {
                 line = reader.readLine();
 
                 if (line == null) break;
-                ListMap<String, String> attr = Utils.ParseEntryStrToMap(line);
-                for (ListMapEntry<String, String> t : attr.entrySet()) {
-                    attrToTable.put(t.key, Config.BuyerTable);
+                Map<String, String> attr = Utils.ParseEntryStrToMap(line);
+                for (Map.Entry<String, String> t : attr.entrySet()) {
+                    attrToTable.put(t.getKey(), Config.BuyerTable);
                 }
                 String buyerid = attr.get("buyerid");
                 long buyerIdHashVal = Utils.hash(buyerid);
@@ -201,9 +201,9 @@ public class OrderSystemImpl implements OrderSystem {
                 line = reader.readLine();
 
                 if (line == null) break;
-                ListMap<String, String> attr = Utils.ParseEntryStrToMap(line);
-                for (ListMapEntry<String, String> t : attr.entrySet()) {
-                    attrToTable.put(t.key, Config.OrderTable);
+                Map<String, String> attr = Utils.ParseEntryStrToMap(line);
+                for (Map.Entry<String, String> t : attr.entrySet()) {
+                    attrToTable.put(t.getKey(), Config.OrderTable);
                 }
                 long orderId = Long.parseLong(attr.get("orderid"));
                 String goodid = attr.get("goodid");
@@ -700,7 +700,7 @@ public class OrderSystemImpl implements OrderSystem {
         attrs = new HashSet<>(keys);
         if (ans.isEmpty()) return null;
         String r = ans.get(0);
-        ListMap<String, String> orderLs = Utils.ParseEntryStrToMap(r);
+        Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
 
         for (String key : keys) {
             if (Config.BuyerTable.equals(attrToTable.get(key))) {
@@ -718,9 +718,9 @@ public class OrderSystemImpl implements OrderSystem {
         }
 
         HashMap<String, String> rt = new HashMap<>();
-        for (ListMapEntry<String, String> t : orderLs.entrySet()) {
-            if (t.key.equals("orderid") || attrs.contains(t.key)) {
-                rt.put(t.key, t.value);
+        for (Map.Entry<String, String> t : orderLs.entrySet()) {
+            if (t.getKey().equals("orderid") || attrs.contains(t.getKey())) {
+                rt.put(t.getKey(), t.getValue());
             }
         }
 
@@ -734,13 +734,11 @@ public class OrderSystemImpl implements OrderSystem {
         List<String> ans = QueryOrderByBuyer(Utils.hash(buyerid), startTime, endTime, orderBuyerIndexOffset, sortedOrderBuyerIndexBlockFiles);
         List<Result> rr = new ArrayList<>();
         if (ans.isEmpty()) return rr.iterator();
-        ListMap<String, String> buyerInfo = Utils.ParseEntryStrToMap(QueryBuyerByBuyer(buyerid));
-
-
+        Map<String, String> buyerInfo = Utils.ParseEntryStrToMap(QueryBuyerByBuyer(buyerid));
 
         for (String r : ans) {
-            ListMap<String, String> ls = Utils.ParseEntryStrToMap(r);
-            ListMap<String, String> goodInfo = Utils.ParseEntryStrToMap(QueryGoodByGood(ls.get("goodid")));
+            Map<String, String> ls = Utils.ParseEntryStrToMap(r);
+            Map<String, String> goodInfo = Utils.ParseEntryStrToMap(QueryGoodByGood(ls.get("goodid")));
             ls.putAll(buyerInfo);
             ls.putAll(goodInfo);
             rr.add(new QueryResult(ls));
@@ -773,7 +771,7 @@ public class OrderSystemImpl implements OrderSystem {
         List<Result> rr = new ArrayList<>();
         if (ans.isEmpty()) return rr.iterator();
 
-        ListMap<String, String> goodAttr = new ListMap<>();
+        Map<String, String> goodAttr = new HashMap<>();
         for (String key : keys) {
             if (Config.GoodTable.equals(attrToTable.get(key))) {
                 String goodStr = QueryGoodByGood(goodid);
@@ -783,7 +781,7 @@ public class OrderSystemImpl implements OrderSystem {
         }
 
         for (String r : ans) {
-            ListMap<String, String> orderLs = Utils.ParseEntryStrToMap(r);
+            Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
             for (String key : keys) {
                 if (Config.BuyerTable.equals(attrToTable.get(key))) {
                     String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
@@ -793,9 +791,9 @@ public class OrderSystemImpl implements OrderSystem {
             orderLs.putAll(goodAttr);
 
             HashMap<String, String> rt = new HashMap<>();
-            for (ListMapEntry<String, String> t : orderLs.entrySet()) {
-                if (t.key.equals("orderid") || attrs == null || attrs.contains(t.key)) {
-                    rt.put(t.key, t.value);
+            for (Map.Entry<String, String> t : orderLs.entrySet()) {
+                if (t.getKey().equals("orderid") || attrs == null || attrs.contains(t.getKey())) {
+                    rt.put(t.getKey(), t.getValue());
                 }
             }
             rr.add(new QueryResult(rt));

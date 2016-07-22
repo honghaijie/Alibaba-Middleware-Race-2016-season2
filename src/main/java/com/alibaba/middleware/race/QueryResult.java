@@ -29,14 +29,8 @@ public class QueryResult implements OrderSystem.Result {
         return Long.parseLong(m.get("orderid"));
     }
 
-    public QueryResult(HashMap<String, String> m) {
+    public QueryResult(Map<String, String> m) {
         this.m = m;
-    }
-    public QueryResult(ListMap<String, String> m) {
-        this.m = new HashMap<>();
-        for (ListMapEntry<String, String> e : m.entrySet()) {
-            this.m.put(e.key, e.value);
-        }
     }
 
     private Map<String, String> m;
