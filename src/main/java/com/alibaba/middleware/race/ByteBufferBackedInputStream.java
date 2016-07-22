@@ -12,7 +12,7 @@ public class ByteBufferBackedInputStream extends InputStream {
     BigMappedByteBuffer buf;
     int cur;
 
-    public ByteBufferBackedInputStream(BigMappedByteBuffer buf, int offset) {
+    public ByteBufferBackedInputStream(BigMappedByteBuffer buf, long offset) {
         this.buf = buf;
         buf.position(offset);
         this.cur = 0;
