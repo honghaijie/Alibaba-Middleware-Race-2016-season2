@@ -23,7 +23,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     private Map<String, BigMappedByteBuffer> mbbMap = new HashMap<>(10000);
 
-    private SimpleCache rawDataCache = new SimpleCache(49999);
+    private SimpleCache rawDataCache = new SimpleCache(123455);
 
 
     static final int orderBlockNum = 150;
