@@ -99,13 +99,18 @@ public class Utils {
         bw.close();
     }
     public static Map<String, String> ParseEntryStrToMap(String s) {
-        String[] fields = s.split("\\t");
+        String[] fields = s.split("\t");
         Map<String, String> ans = new HashMap<String, String>();
-        for (String kvString : fields) {
-            String[] splitedKeyValuePair = kvString.split(":");
-            String key = splitedKeyValuePair[0];
-            String value = splitedKeyValuePair[1];
+        int from = 0;
+        while (true) {
+            int spIdx = s.indexOf(':', from);
+            int nxIdx = s.indexOf('\t', spIdx);
+            if (nxIdx == -1) nxIdx = s.length();
+            String key = s.substring(from, spIdx);
+            String value = s.substring(spIdx + 1, nxIdx);
             ans.put(key, value);
+            if (nxIdx == s.length()) break;
+            from = nxIdx + 1;
         }
         return ans;
     }

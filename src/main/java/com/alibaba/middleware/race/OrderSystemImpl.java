@@ -23,7 +23,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     private Map<String, BigMappedByteBuffer> mbbMap = new HashMap<>(10000);
 
-    private SimpleCache rawDataCache = new SimpleCache(123455);
+    private SimpleCache rawDataCache = new SimpleCache(77777);
 
 
     static final int orderBlockNum = 150;
@@ -701,9 +701,7 @@ public class OrderSystemImpl implements OrderSystem {
         if (keys == null) {
             keys = attrToTable.keySet();
         }
-        if (keys != null) {
-            attrs = new HashSet<>(keys);
-        }
+        attrs = new HashSet<>(keys);
         if (ans.isEmpty()) return null;
         String r = ans.get(0);
         Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
@@ -725,7 +723,7 @@ public class OrderSystemImpl implements OrderSystem {
 
         Map<String, String> rt = new HashMap<>();
         for (Map.Entry<String, String> t : orderLs.entrySet()) {
-            if (t.getKey().equals("orderid") || attrs == null || attrs.contains(t.getKey())) {
+            if (t.getKey().equals("orderid") || attrs.contains(t.getKey())) {
                 rt.put(t.getKey(), t.getValue());
             }
         }
@@ -774,11 +772,8 @@ public class OrderSystemImpl implements OrderSystem {
         if (keys == null) {
             keys = attrToTable.keySet();
         }
-        if (keys != null) {
-            attrs = new HashSet<>(keys);
-        } else {
-            attrs = null;
-        }
+        attrs = new HashSet<>(keys);
+
         List<Result> rr = new ArrayList<>();
         if (ans.isEmpty()) return rr.iterator();
 
