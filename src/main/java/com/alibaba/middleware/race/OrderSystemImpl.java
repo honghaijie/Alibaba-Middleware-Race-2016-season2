@@ -1,5 +1,7 @@
 package com.alibaba.middleware.race;
 
+import com.alibaba.middleware.race.diskio.DiskStringReader;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyException;
@@ -121,9 +123,7 @@ public class OrderSystemImpl implements OrderSystem {
         int total = 0;
         for (int goodFileId = 0; goodFileId < goodFiles.size(); ++goodFileId) {
             String filename = goodFiles.get(goodFileId);
-            File file = new File(filename);
-            InputStreamReader isr = new InputStreamReader(new FileInputStream(file), "UTF-8");
-            BufferedReader reader = new BufferedReader(isr, bufferSize);
+            DiskStringReader reader = new DiskStringReader(filename);
             String line;
             long offset = 0;
             while (true) {
@@ -156,9 +156,7 @@ public class OrderSystemImpl implements OrderSystem {
         int total = 0;
         for (int buyerFileId = 0; buyerFileId < buyerFiles.size(); ++buyerFileId) {
             String filename = buyerFiles.get(buyerFileId);
-            File file = new File(filename);
-            InputStreamReader isr = new InputStreamReader(new FileInputStream(file), "UTF-8");
-            BufferedReader reader = new BufferedReader(isr, bufferSize);
+            DiskStringReader reader = new DiskStringReader(filename);
             String line;
             long offset = 0;
             while (true) {
@@ -192,9 +190,7 @@ public class OrderSystemImpl implements OrderSystem {
         int total = 0;
         for (int orderFileId = 0; orderFileId < orderFiles.size(); ++orderFileId) {
             String filename = orderFiles.get(orderFileId);
-            File file = new File(filename);
-            InputStreamReader isr = new InputStreamReader(new FileInputStream(file), "UTF-8");
-            BufferedReader reader = new BufferedReader(isr, bufferSize);
+            DiskStringReader reader = new DiskStringReader(filename);
             String line;
             long offset = 0;
             while (true) {
