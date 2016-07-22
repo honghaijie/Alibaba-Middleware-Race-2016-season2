@@ -1,11 +1,7 @@
 package com.alibaba.middleware.race;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.security.KeyException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,7 +19,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     private Map<String, BigMappedByteBuffer> mbbMap = new HashMap<>(10000);
 
-    private SimpleCache rawDataCache = new SimpleCache(77777);
+    private SimpleCache rawDataCache = new SimpleCache(49999);
 
 
     static final int orderBlockNum = 150;
@@ -103,7 +99,7 @@ public class OrderSystemImpl implements OrderSystem {
                     if (t == null) {
                         continue;
                     }
-                    Map<String, String> attr = Utils.ParseEntryStrToMap(t);
+                    ListMap<String, String> attr = Utils.ParseEntryStrToMap(t);
                     long buyerHash = Utils.hash(attr.get("buyerid"));
                     long createTime = Long.parseLong(attr.get("createtime"));
                     ans.add(new Tuple<Long, Long>(buyerHash, createTime));
@@ -134,10 +130,10 @@ public class OrderSystemImpl implements OrderSystem {
                 line = reader.readLine();
 
                 if (line == null) break;
-                Map<String, String> attr = Utils.ParseEntryStrToMap(line);
+                ListMap<String, String> attr = Utils.ParseEntryStrToMap(line);
                 String goodid = attr.get("goodid");
-                for (String t : attr.keySet()) {
-                    attrToTable.put(t, Config.GoodTable);
+                for (ListMapEntry<String, String> t : attr.entrySet()) {
+                    attrToTable.put(t.key, Config.GoodTable);
                 }
                 long goodIdHashVal = Utils.hash(goodid);
 
@@ -169,9 +165,9 @@ public class OrderSystemImpl implements OrderSystem {
                 line = reader.readLine();
 
                 if (line == null) break;
-                Map<String, String> attr = Utils.ParseEntryStrToMap(line);
-                for (String t : attr.keySet()) {
-                    attrToTable.put(t, Config.BuyerTable);
+                ListMap<String, String> attr = Utils.ParseEntryStrToMap(line);
+                for (ListMapEntry<String, String> t : attr.entrySet()) {
+                    attrToTable.put(t.key, Config.BuyerTable);
                 }
                 String buyerid = attr.get("buyerid");
                 long buyerIdHashVal = Utils.hash(buyerid);
@@ -205,9 +201,9 @@ public class OrderSystemImpl implements OrderSystem {
                 line = reader.readLine();
 
                 if (line == null) break;
-                Map<String, String> attr = Utils.ParseEntryStrToMap(line);
-                for (String t : attr.keySet()) {
-                    attrToTable.put(t, Config.OrderTable);
+                ListMap<String, String> attr = Utils.ParseEntryStrToMap(line);
+                for (ListMapEntry<String, String> t : attr.entrySet()) {
+                    attrToTable.put(t.key, Config.OrderTable);
                 }
                 long orderId = Long.parseLong(attr.get("orderid"));
                 String goodid = attr.get("goodid");
@@ -704,7 +700,7 @@ public class OrderSystemImpl implements OrderSystem {
         attrs = new HashSet<>(keys);
         if (ans.isEmpty()) return null;
         String r = ans.get(0);
-        Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
+        ListMap<String, String> orderLs = Utils.ParseEntryStrToMap(r);
 
         for (String key : keys) {
             if (Config.BuyerTable.equals(attrToTable.get(key))) {
@@ -721,10 +717,10 @@ public class OrderSystemImpl implements OrderSystem {
             }
         }
 
-        Map<String, String> rt = new HashMap<>();
-        for (Map.Entry<String, String> t : orderLs.entrySet()) {
-            if (t.getKey().equals("orderid") || attrs.contains(t.getKey())) {
-                rt.put(t.getKey(), t.getValue());
+        HashMap<String, String> rt = new HashMap<>();
+        for (ListMapEntry<String, String> t : orderLs.entrySet()) {
+            if (t.key.equals("orderid") || attrs.contains(t.key)) {
+                rt.put(t.key, t.value);
             }
         }
 
@@ -738,13 +734,13 @@ public class OrderSystemImpl implements OrderSystem {
         List<String> ans = QueryOrderByBuyer(Utils.hash(buyerid), startTime, endTime, orderBuyerIndexOffset, sortedOrderBuyerIndexBlockFiles);
         List<Result> rr = new ArrayList<>();
         if (ans.isEmpty()) return rr.iterator();
-        Map<String, String> buyerInfo = Utils.ParseEntryStrToMap(QueryBuyerByBuyer(buyerid));
+        ListMap<String, String> buyerInfo = Utils.ParseEntryStrToMap(QueryBuyerByBuyer(buyerid));
 
 
 
         for (String r : ans) {
-            Map<String, String> ls = Utils.ParseEntryStrToMap(r);
-            Map<String, String> goodInfo = Utils.ParseEntryStrToMap(QueryGoodByGood(ls.get("goodid")));
+            ListMap<String, String> ls = Utils.ParseEntryStrToMap(r);
+            ListMap<String, String> goodInfo = Utils.ParseEntryStrToMap(QueryGoodByGood(ls.get("goodid")));
             ls.putAll(buyerInfo);
             ls.putAll(goodInfo);
             rr.add(new QueryResult(ls));
@@ -777,7 +773,7 @@ public class OrderSystemImpl implements OrderSystem {
         List<Result> rr = new ArrayList<>();
         if (ans.isEmpty()) return rr.iterator();
 
-        Map<String, String> goodAttr = new HashMap<>();
+        ListMap<String, String> goodAttr = new ListMap<>();
         for (String key : keys) {
             if (Config.GoodTable.equals(attrToTable.get(key))) {
                 String goodStr = QueryGoodByGood(goodid);
@@ -787,7 +783,7 @@ public class OrderSystemImpl implements OrderSystem {
         }
 
         for (String r : ans) {
-            Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
+            ListMap<String, String> orderLs = Utils.ParseEntryStrToMap(r);
             for (String key : keys) {
                 if (Config.BuyerTable.equals(attrToTable.get(key))) {
                     String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
@@ -796,10 +792,10 @@ public class OrderSystemImpl implements OrderSystem {
             }
             orderLs.putAll(goodAttr);
 
-            Map<String, String> rt = new HashMap<>();
-            for (Map.Entry<String, String> t : orderLs.entrySet()) {
-                if (t.getKey().equals("orderid") || attrs == null || attrs.contains(t.getKey())) {
-                    rt.put(t.getKey(), t.getValue());
+            HashMap<String, String> rt = new HashMap<>();
+            for (ListMapEntry<String, String> t : orderLs.entrySet()) {
+                if (t.key.equals("orderid") || attrs == null || attrs.contains(t.key)) {
+                    rt.put(t.key, t.value);
                 }
             }
             rr.add(new QueryResult(rt));

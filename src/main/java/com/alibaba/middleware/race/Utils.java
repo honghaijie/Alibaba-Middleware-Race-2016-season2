@@ -98,9 +98,9 @@ public class Utils {
 
         bw.close();
     }
-    public static Map<String, String> ParseEntryStrToMap(String s) {
+    public static ListMap<String, String> ParseEntryStrToMap(String s) {
         String[] fields = s.split("\t");
-        Map<String, String> ans = new HashMap<String, String>();
+        ListMap<String, String> ans = new ListMap<String, String>();
         int from = 0;
         while (true) {
             int spIdx = s.indexOf(':', from);
