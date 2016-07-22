@@ -27,11 +27,11 @@ public class OrderSystemImpl implements OrderSystem {
     static final int goodBlockNum = 20;
     static final int bufferSize = 64 * 1024;
     static final int memoryOrderOrderIndexSize = 2000000;
-    static final int memoryOrderGoodIndexSize = 200000;
+    static final int memoryOrderGoodIndexSize = 40000;
     static final int memoryOrderBuyerIndexSize = 2000000;
 
-    static final int memoryBuyerBuyerIndexSize = 200000;
-    static final int memoryGoodGoodIndexSize = 200000;
+    static final int memoryBuyerBuyerIndexSize = 40000;
+    static final int memoryGoodGoodIndexSize = 40000;
 
     List<String> unSortedOrderOrderIndexBlockFiles = new ArrayList<String>();
     List<String> sortedOrderOrderIndexBlockFiles = new ArrayList<String>();
@@ -359,8 +359,9 @@ public class OrderSystemImpl implements OrderSystem {
 
         List<Tuple<Long, Long>> randomBuyerEntries = RandomOrder(orderFiles, orderBlockNum - 1);
         Random rd = new Random(123);
+        int diskCount = 0;
         for (int i = 0; i < orderBlockNum; ++i) {
-            String currentStoreFolder = storeFolders.get(rd.nextInt(storeFolders.size()));
+            String currentStoreFolder = storeFolders.get((diskCount++) % storeFolders.size());
             String unSortedOrderPath = currentStoreFolder + "\\oo" + rd.nextInt() + "_";
             String sortedOrderPath = currentStoreFolder + "\\oo" + rd.nextInt();
             unSortedOrderOrderIndexBlockFiles.add(unSortedOrderPath);
@@ -370,7 +371,7 @@ public class OrderSystemImpl implements OrderSystem {
 
 
         for (int i = 0; i < orderBlockNum; ++i) {
-            String currentStoreFolder = storeFolders.get(rd.nextInt(storeFolders.size()));
+            String currentStoreFolder = storeFolders.get((diskCount++) % storeFolders.size());
             String unSortedGoodPath = currentStoreFolder + "\\og" + rd.nextInt() + "_";
             String sortedGoodPath = currentStoreFolder + "\\og" + rd.nextInt();
             unSortedOrderGoodIndexBlockFiles.add(unSortedGoodPath);
@@ -383,7 +384,7 @@ public class OrderSystemImpl implements OrderSystem {
             buyerBlockMapper.put(e, buyerBlockMapper.size());
         }
         for (int i = 0; i < buyerBlockMapper.size(); ++i) {
-            String currentStoreFolder = storeFolders.get(rd.nextInt(storeFolders.size()));
+            String currentStoreFolder = storeFolders.get((diskCount++) % storeFolders.size());
             String unSortedBuyerPath = currentStoreFolder + "\\ob" + rd.nextInt() + "_";
             String sortedBuyerPath = currentStoreFolder + "\\ob" + rd.nextInt();
             unSortedOrderBuyerIndexBlockFiles.add(unSortedBuyerPath);
@@ -392,7 +393,7 @@ public class OrderSystemImpl implements OrderSystem {
         }
 
         for (int i = 0; i < buyerBlockNum; ++i) {
-            String currentStoreFolder = storeFolders.get(rd.nextInt(storeFolders.size()));
+            String currentStoreFolder = storeFolders.get((diskCount++) % storeFolders.size());
             String unSortedBuyerPath = currentStoreFolder + "\\bb" + rd.nextInt() + "_";
             String sortedBuyerPath = currentStoreFolder + "\\bb" + rd.nextInt();
             unSortedBuyerBuyerIndexBlockFiles.add(unSortedBuyerPath);
@@ -400,7 +401,7 @@ public class OrderSystemImpl implements OrderSystem {
             buyerBuyerIndexBlockFilesOutputStreamMapper.put(unSortedBuyerPath, new BufferedOutputStream(new FileOutputStream(unSortedBuyerPath), bufferSize));
         }
         for (int i = 0; i < goodBlockNum; ++i) {
-            String currentStoreFolder = storeFolders.get(rd.nextInt(storeFolders.size()));
+            String currentStoreFolder = storeFolders.get((diskCount++) % storeFolders.size());
             String unSortedGoodPath = currentStoreFolder + "\\gg" + rd.nextInt() + "_";
             String sortedGoodPath = currentStoreFolder + "\\gg" + rd.nextInt();
             unSortedGoodGoodIndexBlockFiles.add(unSortedGoodPath);
