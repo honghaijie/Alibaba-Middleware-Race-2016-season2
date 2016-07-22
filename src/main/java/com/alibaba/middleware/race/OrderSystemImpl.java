@@ -767,34 +767,56 @@ public class OrderSystemImpl implements OrderSystem {
             keys = attrToTable.keySet();
         }
         attrs = new HashSet<>(keys);
-
+        attrs.add("orderid");
         List<Result> rr = new ArrayList<>();
         if (ans.isEmpty()) return rr.iterator();
 
         Map<String, String> goodAttr = new HashMap<>();
+        boolean loadGoodTable = false;
+        boolean loadBuyerTable = false;
         for (String key : keys) {
             if (Config.GoodTable.equals(attrToTable.get(key))) {
-                String goodStr = QueryGoodByGood(goodid);
-                goodAttr = Utils.ParseEntryStrToMap(goodStr);
-                break;
+                loadGoodTable = true;
+            }
+            if (Config.BuyerTable.equals(attrToTable.get(key))) {
+                loadBuyerTable = true;
             }
         }
-
+        if (loadGoodTable) {
+            String goodStr = QueryGoodByGood(goodid);
+            Map<String, String> t = Utils.ParseEntryStrToMap(goodStr);
+            for (Map.Entry<String, String> e : t.entrySet()) {
+                if (attrs.contains(e.getKey())) {
+                    goodAttr.put(e.getKey(), e.getValue());
+                }
+            }
+        }
+        if (loadGoodTable) {
+            attrs.add("goodid");
+        }
+        if (loadBuyerTable) {
+            attrs.add("buyerid");
+        }
         for (String r : ans) {
-            Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
-            for (String key : keys) {
-                if (Config.BuyerTable.equals(attrToTable.get(key))) {
-                    String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
-                    orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
+            Map<String, String> orderLs = new HashMap<>();
+            for (Map.Entry<String, String> e : Utils.ParseEntryStrToMap(r).entrySet()) {
+                if (attrs.contains(e.getKey())) {
+                    orderLs.put(e.getKey(), e.getValue());
+                }
+            }
+            if (loadBuyerTable) {
+                String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
+                for (Map.Entry<String, String> e : Utils.ParseEntryStrToMap(buyerStr).entrySet()) {
+                    if (attrs.contains(e.getKey())) {
+                        orderLs.put(e.getKey(), e.getValue());
+                    }
                 }
             }
             orderLs.putAll(goodAttr);
 
             HashMap<String, String> rt = new HashMap<>();
             for (Map.Entry<String, String> t : orderLs.entrySet()) {
-                if (t.getKey().equals("orderid") || attrs == null || attrs.contains(t.getKey())) {
-                    rt.put(t.getKey(), t.getValue());
-                }
+                rt.put(t.getKey(), t.getValue());
             }
             rr.add(new QueryResult(rt));
         }
