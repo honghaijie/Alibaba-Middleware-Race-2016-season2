@@ -1,5 +1,6 @@
 package com.alibaba.middleware.race;
 
+import com.alibaba.middleware.race.diskio.DiskBytesWriter;
 import com.alibaba.middleware.race.diskio.DiskStringReader;
 
 import java.io.*;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class OrderSystemImpl implements OrderSystem {
     private List<String> disks = new ArrayList<>();
+    private Map<String, DiskBytesWriter> diskWriterMap = new HashMap<>();
 
     private Map<String, Integer> fileIdMapper = new TreeMap<String, Integer>();
     private Map<Integer, String> fileIdMapperRev = new TreeMap<Integer, String>();
@@ -43,11 +45,6 @@ public class OrderSystemImpl implements OrderSystem {
     List<String> unSortedOrderBuyerIndexBlockFiles = new ArrayList<String>();
     List<String> sortedOrderBuyerIndexBlockFiles = new ArrayList<String>();
 
-
-
-    Map<String, BufferedOutputStream> orderOrderIndexBlockFilesOutputStreamMapper = new HashMap<String, BufferedOutputStream>();
-    Map<String, BufferedOutputStream> orderGoodIndexBlockFilesOutputStreamMapper = new HashMap<String, BufferedOutputStream>();
-    Map<String, BufferedOutputStream> orderBuyerIndexBlockFilesOutputStreamMapper = new HashMap<String, BufferedOutputStream>();
 
     Map<String, TreeMap<Long, Long>> orderOrderIndexOffset = new HashMap<String, TreeMap<Long, Long>>();
     Map<String, TreeMap<Long, Long>> orderGoodIndexOffset = new HashMap<String, TreeMap<Long, Long>>();
@@ -189,6 +186,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     private long ExtractOrderOffset(List<String> orderFiles) throws IOException, KeyException, InterruptedException {
         int total = 0;
+
         for (int orderFileId = 0; orderFileId < orderFiles.size(); ++orderFileId) {
             String filename = orderFiles.get(orderFileId);
             DiskStringReader reader = new DiskStringReader(filename);
@@ -210,33 +208,19 @@ public class OrderSystemImpl implements OrderSystem {
 
                 int orderBlockId = (int)(orderId % orderBlockNum);
                 String orderIndexPath = unSortedOrderOrderIndexBlockFiles.get(orderBlockId);
-                BufferedOutputStream bos = orderOrderIndexBlockFilesOutputStreamMapper.get(orderIndexPath);
-                synchronized (bos) {
-                    bos.write(Utils.longToBytes(orderId));
-                    bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
-                }
+                diskWriterMap.get(Utils.GetDisk(orderIndexPath)).write(orderIndexPath, Utils.longToBytes(orderId, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
+
 
                 long goodHashVal = Utils.hash(goodid);
                 int goodBlockId = (int)((goodHashVal) % orderBlockNum);
                 String goodIndexPath = unSortedOrderGoodIndexBlockFiles.get(goodBlockId);
-                bos = orderGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath);
-                synchronized (bos) {
-                    bos.write(Utils.longToBytes(goodHashVal));
-                    bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
-                }
+                diskWriterMap.get(Utils.GetDisk(goodIndexPath)).write(goodIndexPath, Utils.longToBytes(goodHashVal, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
 
                 long buyerHashVal = Utils.hash(buyerid);
                 Tuple<Long, Long> buyerIndexEntry = new Tuple<>(buyerHashVal, createtime);
                 int buyerBlockId = buyerBlockMapper.floorEntry(buyerIndexEntry).getValue();
                 String buyerIndexPath = unSortedOrderBuyerIndexBlockFiles.get(buyerBlockId);
-                bos = orderBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath);
-                synchronized (bos) {
-                    bos.write(Utils.longToBytes(buyerHashVal));
-                    bos.write(Utils.longToBytes(createtime));
-                    bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
-                }
-
-
+                diskWriterMap.get(Utils.GetDisk(buyerIndexPath)).write(buyerIndexPath, Utils.longToBytes(buyerHashVal, createtime, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
 
                 offset += (line + "\n").getBytes(StandardCharsets.UTF_8).length;
                 ++total;
@@ -422,7 +406,6 @@ public class OrderSystemImpl implements OrderSystem {
             String sortedOrderPath = currentStoreFolder + "\\oo" + rd.nextInt();
             unSortedOrderOrderIndexBlockFiles.add(unSortedOrderPath);
             sortedOrderOrderIndexBlockFiles.add(sortedOrderPath);
-            orderOrderIndexBlockFilesOutputStreamMapper.put(unSortedOrderPath, new BufferedOutputStream(new FileOutputStream(unSortedOrderPath), bufferSize));
         }
 
 
@@ -432,7 +415,6 @@ public class OrderSystemImpl implements OrderSystem {
             String sortedGoodPath = currentStoreFolder + "\\og" + rd.nextInt();
             unSortedOrderGoodIndexBlockFiles.add(unSortedGoodPath);
             sortedOrderGoodIndexBlockFiles.add(sortedGoodPath);
-            orderGoodIndexBlockFilesOutputStreamMapper.put(unSortedGoodPath, new BufferedOutputStream(new FileOutputStream(unSortedGoodPath), bufferSize));
         }
 
         buyerBlockMapper.put(new Tuple<Long, Long>(-1L, -1L), 0);
@@ -445,7 +427,6 @@ public class OrderSystemImpl implements OrderSystem {
             String sortedBuyerPath = currentStoreFolder + "\\ob" + rd.nextInt();
             unSortedOrderBuyerIndexBlockFiles.add(unSortedBuyerPath);
             sortedOrderBuyerIndexBlockFiles.add(sortedBuyerPath);
-            orderBuyerIndexBlockFilesOutputStreamMapper.put(unSortedBuyerPath, new BufferedOutputStream(new FileOutputStream(unSortedBuyerPath), bufferSize));
         }
 
         for (int i = 0; i < buyerBlockNum; ++i) {
@@ -464,6 +445,16 @@ public class OrderSystemImpl implements OrderSystem {
             sortedGoodGoodIndexBlockFiles.add(sortedGoodPath);
             goodGoodIndexBlockFilesOutputStreamMapper.put(unSortedGoodPath, new BufferedOutputStream(new FileOutputStream(unSortedGoodPath), bufferSize));
         }
+        List<String> allUnsortedOrderIndexFiles = new ArrayList<>();
+        allUnsortedOrderIndexFiles.addAll(unSortedOrderOrderIndexBlockFiles);
+        allUnsortedOrderIndexFiles.addAll(unSortedOrderGoodIndexBlockFiles);
+        allUnsortedOrderIndexFiles.addAll(unSortedOrderBuyerIndexBlockFiles);
+        List<List<String>> allUnsortedOrderIndexFilesGroupByDisk = Utils.GroupByDisk(allUnsortedOrderIndexFiles);
+        for (List<String> ls : allUnsortedOrderIndexFilesGroupByDisk) {
+            String diskTag = Utils.GetDisk(ls.get(0));
+            diskWriterMap.put(diskTag, new DiskBytesWriter(ls));
+        }
+
         final List<List<String>> orderFilesGroupByDisk = Utils.GroupByDisk(orderFiles);
         final List<List<String>> goodFilesGroupByDisk = Utils.GroupByDisk(goodFiles);
         final List<List<String>> buyerFilesGroupByDisk = Utils.GroupByDisk(buyerFiles);
@@ -531,18 +522,10 @@ public class OrderSystemImpl implements OrderSystem {
             t3[i].join();
         }
 
-        //orderEntriesCount = ExtractOrderOffset(orderFiles);
-        //buyerEntriesCount = ExtractBuyerOffset(buyerFiles);
-        //goodEntriesCount = ExtractGoodOffset(goodFiles);
-        for (BufferedOutputStream s : orderOrderIndexBlockFilesOutputStreamMapper.values()) {
-            s.close();
+        for (DiskBytesWriter dbw : diskWriterMap.values()) {
+            dbw.close();
         }
-        for (BufferedOutputStream s : orderGoodIndexBlockFilesOutputStreamMapper.values()) {
-            s.close();
-        }
-        for (BufferedOutputStream s : orderBuyerIndexBlockFilesOutputStreamMapper.values()) {
-            s.close();
-        }
+
         for (BufferedOutputStream s : buyerBuyerIndexBlockFilesOutputStreamMapper.values()) {
             s.close();
         }
@@ -552,45 +535,27 @@ public class OrderSystemImpl implements OrderSystem {
         SortOffsetParallel();
 
         for (String path : sortedOrderOrderIndexBlockFiles) {
-            //FileChannel fc = FileChannel.open(Paths.get(path));
-            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
             BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
-            //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : sortedOrderBuyerIndexBlockFiles) {
-            //FileChannel fc = FileChannel.open(Paths.get(path));
-            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
             BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
-            //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : sortedOrderGoodIndexBlockFiles) {
-            //FileChannel fc = FileChannel.open(Paths.get(path));
-            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
             BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
-            //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : sortedBuyerBuyerIndexBlockFiles) {
-            //FileChannel fc = FileChannel.open(Paths.get(path));
-            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
             BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
-            //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : sortedGoodGoodIndexBlockFiles) {
-            //FileChannel fc = FileChannel.open(Paths.get(path));
-            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
             BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
-            //buf.load();
             mbbMap.put(path, buf);
         }
         for (String path : fileIdMapper.keySet()) {
-            //FileChannel fc = FileChannel.open(Paths.get(path));
-            //MappedByteBuffer buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
             BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
-            //buf.load();
             mbbMap.put(path, buf);
         }
     }

@@ -1,13 +1,10 @@
 package com.alibaba.middleware.race.diskio;
 
-import com.alibaba.middleware.race.Tuple;
-
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -31,7 +28,7 @@ public class DiskBytesWriter {
     }
     public void write(String filename, byte[] bytes) {
         try {
-            q.put(new WriteMessage<byte[]>(filename, bytes));
+            q.put(new WriteMessage<byte[]>(filenameMapper.get(filename), bytes));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -45,7 +42,7 @@ public class DiskBytesWriter {
                         if (msg.isEnd()) {
                             break;
                         }
-                        filenameMapper.get(msg.filename).write(msg.content);
+                        msg.outputStream.write(msg.content);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
@@ -54,6 +51,7 @@ public class DiskBytesWriter {
                 }
             }
         };
+        t.start();
     }
     public void close() {
         try {

@@ -14,6 +14,19 @@ public class Utils {
         buffer.putLong(x);
         return buffer.array();
     }
+    public static byte[] longToBytes(long x, long y) {
+        ByteBuffer buffer = ByteBuffer.allocate(16);
+        buffer.putLong(x);
+        buffer.putLong(y);
+        return buffer.array();
+    }
+    public static byte[] longToBytes(long x, long y, long z) {
+        ByteBuffer buffer = ByteBuffer.allocate(24);
+        buffer.putLong(x);
+        buffer.putLong(y);
+        buffer.putLong(z);
+        return buffer.array();
+    }
 
     public static long bytesToLong(byte[] bytes) {
         ByteBuffer buffer = ByteBuffer.allocate(8);
