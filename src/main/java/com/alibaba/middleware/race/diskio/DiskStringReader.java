@@ -14,7 +14,7 @@ public class DiskStringReader {
     BlockingQueue<String> q;
     BufferedReader br;
     Thread t;
-    int bufferSize = 64 * 1024;
+    int bufferSize = 1024 * 1024;
     int capacity = 1000;
     public DiskStringReader(String filename) throws FileNotFoundException {
         q = new ArrayBlockingQueue<String>(capacity);
