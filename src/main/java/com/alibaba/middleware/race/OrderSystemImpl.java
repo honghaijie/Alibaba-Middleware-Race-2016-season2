@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentMap;
 
 
 public class OrderSystemImpl implements OrderSystem {
+    private List<String> disks = new ArrayList<>();
 
     private Map<String, Integer> fileIdMapper = new TreeMap<String, Integer>();
     private Map<Integer, String> fileIdMapperRev = new TreeMap<Integer, String>();
@@ -336,10 +337,69 @@ public class OrderSystemImpl implements OrderSystem {
         }
         return res;
     }
+    private void SortOffsetParallel() {
+
+        try {
+            Thread[] ths = new Thread[disks.size()];
+            int cnt = 0;
+            for (String s : disks) {
+                final String disk = s;
+                Thread t = new Thread() {
+                    public void run() {
+                        try {
+                            long orderOrderRatio = orderEntriesCount / memoryOrderOrderIndexSize;
+                            if (orderOrderRatio == 0) orderOrderRatio = 1;
+                            Map<String, TreeMap<Long, Long>> t1 = SortOffset(Utils.filterByDisk(unSortedOrderOrderIndexBlockFiles, disk), Utils.filterByDisk(sortedOrderOrderIndexBlockFiles, disk), orderOrderRatio);
+                            synchronized (orderOrderIndexOffset) {
+                                orderOrderIndexOffset.putAll(t1);
+                            }
+
+                            long orderGoodRatio = goodEntriesCount / memoryOrderGoodIndexSize;
+                            if (orderGoodRatio == 0) orderGoodRatio = 1;
+                            Map<String, TreeMap<Long, Long>> t2 = SortOffset(Utils.filterByDisk(unSortedOrderGoodIndexBlockFiles, disk), Utils.filterByDisk(sortedOrderGoodIndexBlockFiles, disk), orderGoodRatio);
+                            synchronized (orderGoodIndexOffset) {
+                                orderGoodIndexOffset.putAll(t2);
+                            }
+
+                            long orderBuyerRatio = orderEntriesCount / memoryOrderBuyerIndexSize;
+                            if (orderBuyerRatio == 0) orderBuyerRatio = 1;
+                            Map<String, TreeMap<Tuple<Long, Long>, Long>> t3 = SortBuyerOffset(Utils.filterByDisk(unSortedOrderBuyerIndexBlockFiles, disk), Utils.filterByDisk(sortedOrderBuyerIndexBlockFiles, disk), orderBuyerRatio);
+                            synchronized (orderBuyerIndexOffset) {
+                                orderBuyerIndexOffset.putAll(t3);
+                            }
+
+                            long buyerBuyerRatio = buyerEntriesCount / memoryBuyerBuyerIndexSize;
+                            if (buyerBuyerRatio == 0) buyerBuyerRatio = 1;
+                            Map<String, TreeMap<Long, Long>> t4 = SortOffset(Utils.filterByDisk(unSortedBuyerBuyerIndexBlockFiles, disk), Utils.filterByDisk(sortedBuyerBuyerIndexBlockFiles, disk), buyerBuyerRatio);
+                            synchronized (buyerBuyerIndexOffset) {
+                                buyerBuyerIndexOffset.putAll(t4);
+                            }
+
+                            long goodGoodRatio = orderEntriesCount / memoryGoodGoodIndexSize;
+                            if (goodGoodRatio == 0) goodGoodRatio = 1;
+                            Map<String, TreeMap<Long, Long>> t5 = SortOffset(Utils.filterByDisk(unSortedGoodGoodIndexBlockFiles, disk), Utils.filterByDisk(sortedGoodGoodIndexBlockFiles, disk), goodGoodRatio);
+                            synchronized (goodGoodIndexOffset) {
+                                goodGoodIndexOffset.putAll(t5);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                t.start();
+                ths[cnt++] = t;
+            }
+            for (Thread th : ths) {
+                th.join();
+            }
+        } catch (Exception e) {
+
+        }
+    }
     private void PreProcessOrders(List<String> orderFiles, List<String> buyerFiles, List<String> goodFiles, List<String> storeFolders) throws IOException, KeyException, InterruptedException {
         //goodRawFileOffset = ExtractGoodOffset(goodFiles);
         //buyerRawFileOffset = ExtractBuyerOffset(buyerFiles);
-
+        disks = Utils.GetDisks(storeFolders);
         for (String orderFile : orderFiles) {
             fileIdMapperRev.put(fileIdMapperRev.size(), orderFile);
             fileIdMapper.put(orderFile, fileIdMapper.size());
@@ -489,25 +549,7 @@ public class OrderSystemImpl implements OrderSystem {
         for (BufferedOutputStream s : goodGoodIndexBlockFilesOutputStreamMapper.values()) {
             s.close();
         }
-        long orderOrderRatio = orderEntriesCount / memoryOrderOrderIndexSize;
-        if (orderOrderRatio == 0) orderOrderRatio = 1;
-        orderGoodIndexOffset.putAll(SortOffset(unSortedOrderGoodIndexBlockFiles, sortedOrderGoodIndexBlockFiles, orderOrderRatio));
-
-        long orderGoodRatio = goodEntriesCount / memoryOrderGoodIndexSize;
-        if (orderGoodRatio == 0) orderGoodRatio = 1;
-        orderOrderIndexOffset.putAll(SortOffset(unSortedOrderOrderIndexBlockFiles, sortedOrderOrderIndexBlockFiles, orderGoodRatio));
-
-        long orderBuyerRatio = orderEntriesCount / memoryOrderBuyerIndexSize;
-        if (orderBuyerRatio == 0) orderBuyerRatio = 1;
-        orderBuyerIndexOffset.putAll(SortBuyerOffset(unSortedOrderBuyerIndexBlockFiles, sortedOrderBuyerIndexBlockFiles, orderBuyerRatio));
-
-        long buyerBuyerRatio = buyerEntriesCount / memoryBuyerBuyerIndexSize;
-        if (buyerBuyerRatio == 0) buyerBuyerRatio = 1;
-        buyerBuyerIndexOffset.putAll(SortOffset(unSortedBuyerBuyerIndexBlockFiles, sortedBuyerBuyerIndexBlockFiles, buyerBuyerRatio));
-
-        long goodGoodRatio = orderEntriesCount / memoryGoodGoodIndexSize;
-        if (goodGoodRatio == 0) goodGoodRatio = 1;
-        goodGoodIndexOffset.putAll(SortOffset(unSortedGoodGoodIndexBlockFiles, sortedGoodGoodIndexBlockFiles, goodGoodRatio));
+        SortOffsetParallel();
 
         for (String path : sortedOrderOrderIndexBlockFiles) {
             //FileChannel fc = FileChannel.open(Paths.get(path));

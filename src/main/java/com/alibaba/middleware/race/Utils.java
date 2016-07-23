@@ -131,7 +131,9 @@ public class Utils {
     }
     public static String GetDisk(String path) {
         String[] sp = path.split("/");
-        if (sp.length == 1) return sp[0];
+        if (sp.length == 1) {
+            return path.split("\\\\")[0];
+        }
         return sp[1];
     }
     public static List<List<String>> GroupByDisk(List<String> files) {
@@ -146,6 +148,22 @@ public class Utils {
             t.add(orderFile);
         }
         return new ArrayList<>(ans.values());
+    }
+    public static List<String> GetDisks(List<String> files) {
+        Set<String> s = new HashSet<>();
+        for (String f : files) {
+            s.add(GetDisk(f));
+        }
+        return new ArrayList<>(s);
+    }
+    public static List<String> filterByDisk(List<String> files, String tag) {
+        List<String> ans = new ArrayList<>();
+        for (String file : files) {
+            if (GetDisk(file).equals(tag)) {
+                ans.add(file);
+            }
+        }
+        return ans;
     }
     public static long hash(String string) {
         long h = 1125899906842597L; // prime
