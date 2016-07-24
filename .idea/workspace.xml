@@ -2,22 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a370b311-5746-4b52-a5bb-4cc4c089aeab" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/ExternalSort.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java" />
-      <change type="DELETED" beforePath="C:\Users\hahong\IdeaProjects\order-system\good_records.txt" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\hahong\IdeaProjects\order-system\order_records.txt" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\hahong\IdeaProjects\order-system\sortedOrders.txt" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$1.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$2.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$2.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$3.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$3.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/Utils.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/Utils.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/BigMappedByteBuffer.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/BigMappedByteBuffer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringReader.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringReader.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestByCaseFile.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestByCaseFile.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="order-system.iws" />
@@ -40,11 +27,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="OrderSystemImpl.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="OrderSystemImpl.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.0765625">
-              <caret line="820" column="57" selection-start-line="820" selection-start-column="57" selection-end-line="820" selection-end-column="57" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="538" column="9" selection-start-line="538" selection-start-column="9" selection-end-line="538" selection-end-column="9" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="method#RandomOrder#0;class#OrderSystemImpl#0" expanded="false" />
@@ -53,8 +40,17 @@
                 <element signature="method#SortOffset#0;class#OrderSystemImpl#0" expanded="false" />
                 <element signature="method#SortBuyerOffset#0;class#OrderSystemImpl#0" expanded="false" />
                 <element signature="method#SortOffsetParallel#0;class#OrderSystemImpl#0" expanded="false" />
-                <element signature="method#PreProcessOrders#0;class#OrderSystemImpl#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BigMappedByteBuffer.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/BigMappedByteBuffer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.4125">
+              <caret line="63" column="57" selection-start-line="63" selection-start-column="57" selection-end-line="63" selection-end-column="57" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -168,13 +164,13 @@
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomGoodGenerator.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/BigMappedByteBuffer.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestByCaseFile.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringWriter.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/ExternalSort.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringReader.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/BigMappedByteBuffer.java" />
       </list>
     </option>
   </component>
@@ -685,7 +681,7 @@
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2708559" sideWeight="0.49791014" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2708559" sideWeight="0.49791014" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32936078" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24895833" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -1067,14 +1063,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/BigMappedByteBuffer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-1.3214285">
-          <caret line="31" column="32" selection-start-line="31" selection-start-column="32" selection-end-line="31" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1139,8 +1127,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.0765625">
-          <caret line="820" column="57" selection-start-line="820" selection-start-column="57" selection-end-line="820" selection-end-column="57" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="538" column="9" selection-start-line="538" selection-start-column="9" selection-end-line="538" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="method#RandomOrder#0;class#OrderSystemImpl#0" expanded="false" />
@@ -1149,8 +1137,15 @@
             <element signature="method#SortOffset#0;class#OrderSystemImpl#0" expanded="false" />
             <element signature="method#SortBuyerOffset#0;class#OrderSystemImpl#0" expanded="false" />
             <element signature="method#SortOffsetParallel#0;class#OrderSystemImpl#0" expanded="false" />
-            <element signature="method#PreProcessOrders#0;class#OrderSystemImpl#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/BigMappedByteBuffer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.4125">
+          <caret line="63" column="57" selection-start-line="63" selection-start-column="57" selection-end-line="63" selection-end-column="57" />
+          <folding />
         </state>
       </provider>
     </entry>
