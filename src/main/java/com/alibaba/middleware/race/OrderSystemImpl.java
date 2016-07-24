@@ -734,7 +734,7 @@ public class OrderSystemImpl implements OrderSystem {
             }
         }
 
-        System.out.printf("Query order, key: %d\n", keys.size());
+        System.out.printf("Ord,k:%d\n", keys.size());
         return new QueryResult(rt);
 
     }
@@ -764,7 +764,7 @@ public class OrderSystemImpl implements OrderSystem {
                 return 0;
             }
         });
-        System.out.printf("Query buyer, length: %d\n", rr.size());
+        System.out.printf("Buy,l:%d\n", rr.size());
         return rr.iterator();
 
     }
@@ -841,7 +841,7 @@ public class OrderSystemImpl implements OrderSystem {
                 return 0;
             }
         });
-        System.out.printf("Query good, key: %d, length: %d\n", keys.size(), rr.size());
+        System.out.printf("Good,k:%d,l:%d\n", keys.size(), rr.size());
         return rr.iterator();
 
     }
