@@ -3,6 +3,8 @@ package com.alibaba.middleware.race;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.security.KeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -196,4 +198,5 @@ public class Utils {
         long b = m - (a << 45);
         return new Tuple<>(a, b);
     }
+
 }

@@ -18,13 +18,17 @@ public class DiskBytesWriter {
     Map<String, BufferedOutputStream> filenameMapper = new HashMap<>(1000);
     Thread t;
     int bufferSize = 64 * 1024;
-    int capacity = 10000;
-    public DiskBytesWriter(Collection<String> files) throws FileNotFoundException {
-        q = new ArrayBlockingQueue<WriteMessage<byte[]>>(capacity);
-        for (String filename : files) {
-            filenameMapper.put(filename, new BufferedOutputStream(new FileOutputStream(filename), bufferSize));
+    int capacity = 1000;
+    public DiskBytesWriter(Collection<String> files)  {
+        try {
+            q = new ArrayBlockingQueue<WriteMessage<byte[]>>(capacity);
+            for (String filename : files) {
+                filenameMapper.put(filename, new BufferedOutputStream(new FileOutputStream(filename), bufferSize));
+            }
+            startWriteThread();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        startWriteThread();
     }
     public void write(String filename, byte[] bytes) {
         try {

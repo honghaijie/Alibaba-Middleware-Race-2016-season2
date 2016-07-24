@@ -14,6 +14,7 @@ public class BigMappedByteBuffer {
     long totalLength;
     long blockSize;
     int currentBuffer = 0;
+    FileChannel fc;
     private BigMappedByteBuffer() {}
     public BigMappedByteBuffer(String filename, long blockSize) {
         try {
@@ -61,6 +62,7 @@ public class BigMappedByteBuffer {
         return res;
     }
     public void get(byte[] buf, int offset, int length) {
+        System.out.printf("read disk %d\n", length);
         int remain = buffers[currentBuffer].remaining();
         if (remain >= length) {
             buffers[currentBuffer].get(buf, offset, length);
