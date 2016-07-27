@@ -33,7 +33,9 @@ public class RandomFileGenerator {
         }
         try
         {
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(buyerFile), "UTF-8"));
+            //FileWriter out = new FileWriter(new File(buyerFile));
+
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(buyerFile), "UTF-8"), 1024*1024);
             for (String buyerId : buyerIds) {
                 out.append(String.format("buyerid:%s\tb2:%s\tb3:%s\tb4:%s\tb5:%s\tb6:%s\tb7:%s\tb8:%s\n", buyerId, buyerId, buyerId, buyerId, buyerId, buyerId, buyerId, buyerId));
             }
@@ -45,7 +47,7 @@ public class RandomFileGenerator {
 
         try
         {
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(goodFile), "UTF-8"));
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(goodFile), "UTF-8"), 1024*1024);
             for (String goodId : goodIds) {
                 out.append(String.format("goodid:%s\tb2:%s\tb3:%s\tb4:%s\tb5:%s\tb6:%s\tb7:%s\tb8:%s\n", goodId, goodId, goodId, goodId, goodId, goodId, goodId, goodId));
             }
@@ -58,7 +60,7 @@ public class RandomFileGenerator {
         try
         {
             Random r = new Random();
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(orderFile), "UTF-8"));
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(orderFile), "UTF-8"), 1024*1024);
             for (long i = 0; i < orderCount; ++i) {
                 String rd = java.util.UUID.randomUUID().toString();
                 String buyerId = buyerIds.get(r.nextInt((int) buyerCount));
@@ -75,10 +77,12 @@ public class RandomFileGenerator {
         GenerateData();
         System.out.println("Generate complete.");
         OrderSystemImpl impl = new OrderSystemImpl();
+        long startTime = System.currentTimeMillis();
         impl.construct(Arrays.asList(orderFile), Arrays.asList(buyerFile), Arrays.asList(goodFile), Arrays.asList("D:\\middleware-data\\random\\store\\"));
         System.out.println("Construct complete.");
+        System.out.printf("Time: %d.\n", (System.currentTimeMillis() - startTime) / 1000);
         Random rd = new Random();
-        long startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
         for (int i = 0; ; ++i) {
             int type = rd.nextInt(3);
             if (type == 0) {

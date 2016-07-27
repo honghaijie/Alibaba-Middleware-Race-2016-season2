@@ -2,15 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a370b311-5746-4b52-a5bb-4cc4c089aeab" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$1.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$2.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$2.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$3.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$3.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/Utils.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/Utils.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringReader.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringReader.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="order-system.iws" />
@@ -36,11 +31,14 @@
       <file leaf-file-name="OrderSystemImpl.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-2.987013">
-              <caret line="36" column="37" selection-start-line="36" selection-start-column="37" selection-end-line="36" selection-end-column="37" />
+            <state vertical-scroll-proportion="0.7012987">
+              <caret line="697" column="28" selection-start-line="697" selection-start-column="28" selection-end-line="697" selection-end-column="28" />
               <folding>
-                <element signature="e#2040#2069#0" expanded="true" />
-                <element signature="method#RandomOrder#0;class#OrderSystemImpl#0" expanded="false" />
+                <element signature="e#23749#24626#0" expanded="true" />
+                <element signature="e#24625#24626#0" expanded="true" />
+                <element signature="method#QueryEntryById#0;class#OrderSystemImpl#0" expanded="false" />
+                <element signature="e#33615#33767#0" expanded="true" />
+                <element signature="e#33766#33767#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -62,7 +60,7 @@
             <state vertical-scroll-proportion="0.0">
               <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
               <folding>
-                <element signature="imports" expanded="true" />
+                <element signature="imports" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -73,7 +71,9 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="90" column="34" selection-start-line="90" selection-start-column="34" selection-end-line="90" selection-end-column="34" />
-              <folding />
+              <folding>
+                <element signature="imports" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -82,7 +82,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="78" column="50" selection-start-line="78" selection-start-column="50" selection-end-line="78" selection-end-column="50" />
+              <caret line="35" column="14" selection-start-line="35" selection-start-column="14" selection-end-line="35" selection-end-column="14" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -143,7 +143,6 @@
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesReader.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/WriteMessage.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomGoodGenerator.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestByCaseFile.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringWriter.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/ExternalSort.java" />
@@ -151,6 +150,7 @@
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringReader.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" />
       </list>
     </option>
@@ -199,8 +199,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scratches" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -295,6 +293,8 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="PackagesPane" />
     </panes>
   </component>
@@ -708,13 +708,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_45/src.zip!/java/lang/Object.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.0741574">
-          <caret line="500" column="22" selection-start-line="500" selection-start-column="22" selection-end-line="500" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_45/src.zip!/java/util/concurrent/LinkedBlockingDeque.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33258426">
@@ -922,12 +915,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="33" column="5" selection-start-line="33" selection-start-column="5" selection-end-line="33" selection-end-column="5" />
-          <folding>
-            <element signature="e#806#807#0" expanded="false" />
-            <element signature="e#832#833#0" expanded="false" />
-            <element signature="e#806#807#0" expanded="false" />
-            <element signature="e#832#833#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -949,7 +936,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.08539326">
           <caret line="4" column="3" selection-start-line="4" selection-start-column="3" selection-end-line="4" selection-end-column="3" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1008,9 +994,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1048,9 +1031,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.36067414">
           <caret line="19" column="32" selection-start-line="19" selection-start-column="32" selection-end-line="19" selection-end-column="32" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1059,15 +1039,33 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestByCaseFile.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="90" column="34" selection-start-line="90" selection-start-column="34" selection-end-line="90" selection-end-column="34" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_45/src.zip!/java/io/FileWriter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.36435643">
+          <caret line="30" column="48" selection-start-line="30" selection-start-column="43" selection-end-line="30" selection-end-column="48" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="78" column="50" selection-start-line="78" selection-start-column="50" selection-end-line="78" selection-end-column="50" />
+          <caret line="35" column="14" selection-start-line="35" selection-start-column="14" selection-end-line="35" selection-end-column="14" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -1082,21 +1080,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestByCaseFile.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="90" column="34" selection-start-line="90" selection-start-column="34" selection-end-line="90" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-2.987013">
-          <caret line="36" column="37" selection-start-line="36" selection-start-column="37" selection-end-line="36" selection-end-column="37" />
+        <state vertical-scroll-proportion="0.7012987">
+          <caret line="697" column="28" selection-start-line="697" selection-start-column="28" selection-end-line="697" selection-end-column="28" />
           <folding>
-            <element signature="e#2040#2069#0" expanded="true" />
-            <element signature="method#RandomOrder#0;class#OrderSystemImpl#0" expanded="false" />
+            <element signature="e#23749#24626#0" expanded="true" />
+            <element signature="e#24625#24626#0" expanded="true" />
+            <element signature="method#QueryEntryById#0;class#OrderSystemImpl#0" expanded="false" />
+            <element signature="e#33615#33767#0" expanded="true" />
+            <element signature="e#33766#33767#0" expanded="true" />
           </folding>
         </state>
       </provider>

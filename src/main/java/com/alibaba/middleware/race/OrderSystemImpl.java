@@ -22,6 +22,9 @@ import java.util.concurrent.ConcurrentMap;
 
 public class OrderSystemImpl implements OrderSystem {
     private List<String> disks = new ArrayList<>();
+    private Object constructFinishNotifier = new Object();
+    private boolean constructFinish = false;
+
     private Map<String, DiskBytesWriter> diskWriterMap = new HashMap<>();
 
     private Map<String, Integer> fileIdMapper = new TreeMap<String, Integer>();
@@ -396,6 +399,7 @@ public class OrderSystemImpl implements OrderSystem {
     private void PreProcessOrders(List<String> orderFiles, List<String> buyerFiles, List<String> goodFiles, List<String> storeFolders) throws IOException, KeyException, InterruptedException {
         //goodRawFileOffset = ExtractGoodOffset(goodFiles);
         //buyerRawFileOffset = ExtractBuyerOffset(buyerFiles);
+        long start = System.currentTimeMillis();
         disks = Utils.GetDisks(storeFolders);
         for (String orderFile : orderFiles) {
             fileIdMapperRev.put(fileIdMapperRev.size(), orderFile);
@@ -512,8 +516,10 @@ public class OrderSystemImpl implements OrderSystem {
         for (BufferedOutputStream s : goodGoodIndexBlockFilesOutputStreamMapper.values()) {
             s.close();
         }
+        System.out.printf("Classify complete, Time: %d\n", (System.currentTimeMillis() - start) / 1000);
+        start = System.currentTimeMillis();
         SortOffsetParallel();
-
+        System.out.printf("Sort complete, Time: %d\n", (System.currentTimeMillis() - start) / 1000);
         for (String path : sortedOrderOrderIndexBlockFiles) {
             BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
             mbbMap.put(path, buf);
@@ -661,8 +667,7 @@ public class OrderSystemImpl implements OrderSystem {
         return ans.get(0);
     }
 
-    @Override
-    public void construct(Collection<String> orderFiles, Collection<String> buyerFiles, Collection<String> goodFiles, Collection<String> storeFolders) throws IOException, InterruptedException {
+    public void constructThread(Collection<String> orderFiles, Collection<String> buyerFiles, Collection<String> goodFiles, Collection<String> storeFolders) {
         try {
             PreProcessOrders(new ArrayList<String>(orderFiles), new ArrayList<String>(buyerFiles), new ArrayList<String>(goodFiles), new ArrayList<String>(storeFolders));
             System.out.printf("Construct complete, order: %d, good: %d, buyer: %d\n", orderEntriesCount, goodEntriesCount, buyerEntriesCount);
@@ -673,14 +678,40 @@ public class OrderSystemImpl implements OrderSystem {
             for (Map.Entry<String, String> e : attrToTable.entrySet()) {
                 System.out.println(e.getKey() + "\t" + e.getValue());
             }
-
+            synchronized (constructFinishNotifier) {
+                constructFinish = true;
+                constructFinishNotifier.notifyAll();
+            }
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    @Override
+    public void construct(final Collection<String> orderFiles, final Collection<String> buyerFiles, final Collection<String> goodFiles, final Collection<String> storeFolders) {
+        Thread t = new Thread() {
+            public void run() {
+                constructThread(orderFiles, buyerFiles, goodFiles, storeFolders);
+            }
+        };
+        t.start();
+        try {
+            Thread.sleep(3590000);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
     @Override
     public Result queryOrder(long orderId, Collection<String> keys) {
+        synchronized (constructFinishNotifier) {
+            while (!constructFinish) {
+                try {
+                    constructFinishNotifier.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         List<String> ans = QueryEntryById(orderId, orderBlockNum, orderOrderIndexOffset, sortedOrderOrderIndexBlockFiles, fileIdMapperRev);
         Set<String> attrs = null;
         if (keys == null) {
@@ -728,6 +759,15 @@ public class OrderSystemImpl implements OrderSystem {
 
     @Override
     public Iterator<Result> queryOrdersByBuyer(long startTime, long endTime, String buyerid) {
+        synchronized (constructFinishNotifier) {
+            while (!constructFinish) {
+                try {
+                    constructFinishNotifier.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         List<String> ans = QueryOrderByBuyer(Utils.hash(buyerid), startTime, endTime, orderBuyerIndexOffset, sortedOrderBuyerIndexBlockFiles);
         List<Result> rr = new ArrayList<>();
         if (ans.isEmpty()) return rr.iterator();
@@ -758,6 +798,15 @@ public class OrderSystemImpl implements OrderSystem {
 
     @Override
     public Iterator<Result> queryOrdersBySaler(String salerid, String goodid, Collection<String> keys) {
+        synchronized (constructFinishNotifier) {
+            while (!constructFinish) {
+                try {
+                    constructFinishNotifier.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         List<String> ans = QueryEntryById(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, fileIdMapperRev);
         Set<String> attrs = null;
         if (keys == null) {
@@ -843,6 +892,15 @@ public class OrderSystemImpl implements OrderSystem {
 
     @Override
     public KeyValue sumOrdersByGood(String goodid, String key) {
+        synchronized (constructFinishNotifier) {
+            while (!constructFinish) {
+                try {
+                    constructFinishNotifier.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         //List<String> ans = QueryEntryById(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, orderFileIdMapperRev);
         Iterator<Result> ans = queryOrdersBySaler("", goodid, Arrays.asList(key));
         if (!ans.hasNext()) return null;
