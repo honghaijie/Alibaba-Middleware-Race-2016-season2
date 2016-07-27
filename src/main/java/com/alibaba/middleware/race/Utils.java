@@ -152,7 +152,7 @@ public class Utils {
         return sp[1];
     }
     public static List<List<String>> GroupByDisk(List<String> files) {
-        Map<String, List<String>> ans = new HashMap<>();
+        Map<String, List<String>> ans = new TreeMap<>();
         for (String orderFile : files) {
             String diskTag = Utils.GetDisk(orderFile);
             List<String> t = ans.get(diskTag);
