@@ -2,9 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a370b311-5746-4b52-a5bb-4cc4c089aeab" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestInMultipleDisk.java" />
+      <change type="MOVED" beforePath="C:\Users\hahong\IdeaProjects\my-middleware-race-02\src\main\java\com\alibaba\middleware\race\RandomFileGenerator.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestInSingleDisk.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$1.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$1.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$2.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$2.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$3.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl$3.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl.class" afterPath="$PROJECT_DIR$/target/classes/com/alibaba/middleware/race/OrderSystemImpl.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringReader.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringReader.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java" afterPath="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="order-system.iws" />
@@ -31,9 +37,10 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="307" column="0" selection-start-line="307" selection-start-column="0" selection-end-line="307" selection-end-column="0" />
+              <caret line="133" column="0" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
               <folding>
                 <element signature="method#SortBuyerOffset#0;class#OrderSystemImpl#0" expanded="false" />
+                <element signature="method#SortOffsetParallel#0;class#OrderSystemImpl#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -49,21 +56,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Utils.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="170" column="0" selection-start-line="170" selection-start-column="0" selection-end-line="170" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="DiskBytesWriter.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="19" column="22" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
+              <caret line="19" column="33" selection-start-line="19" selection-start-column="33" selection-end-line="19" selection-end-column="33" />
               <folding />
             </state>
           </provider>
@@ -74,7 +71,11 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="63" column="57" selection-start-line="63" selection-start-column="57" selection-end-line="63" selection-end-column="57" />
-              <folding />
+              <folding>
+                <element signature="imports" expanded="false" />
+                <element signature="e#2670#2671#0" expanded="false" />
+                <element signature="e#2726#2727#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -84,19 +85,29 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="105" column="21" selection-start-line="105" selection-start-column="21" selection-end-line="105" selection-end-column="21" />
+              <folding>
+                <element signature="imports" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TestInMultipleDisk.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestInMultipleDisk.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="75" column="9" selection-start-line="75" selection-start-column="9" selection-end-line="75" selection-end-column="9" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RandomFileGenerator.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java">
+      <file leaf-file-name="TestInSingleDisk.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestInSingleDisk.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="3.4630542">
-              <caret line="94" column="32" selection-start-line="94" selection-start-column="32" selection-end-line="94" selection-end-column="32" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state vertical-scroll-proportion="0.54679805">
+              <caret line="95" column="0" selection-start-line="95" selection-start-column="0" selection-end-line="95" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -159,10 +170,12 @@
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/ExternalSort.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/BigMappedByteBuffer.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringReader.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestInMultipleDisk.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestInSingleDisk.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskStringReader.java" />
       </list>
     </option>
   </component>
@@ -210,8 +223,7 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="Scratches" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -306,7 +318,8 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
+      <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -318,31 +331,16 @@
     <property name="recentsLimit" value="5" />
     <property name="dynamic.classpath" value="false" />
     <property name="FullScreen" value="false" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Font" />
+    <property name="settings.editor.selected.configurable" value="project.propCompiler" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
-  <component name="RunManager" selected="Application.RandomFileGenerator">
-    <configuration default="false" name="OrderSystemImpl" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="com.alibaba.middleware.race.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="MAIN_CLASS_NAME" value="com.alibaba.middleware.race.impl.OrderSystemImpl" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="order-system" />
-      <envs />
-      <method />
-    </configuration>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.alibaba.middleware.race" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.TestInSingleDisk">
     <configuration default="false" name="Test" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -386,14 +384,14 @@
       </RunnerSettings>
       <method />
     </configuration>
-    <configuration default="false" name="RandomFileGenerator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+    <configuration default="false" name="TestInMultipleDisk" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
           <option name="PATTERN" value="com.alibaba.middleware.race.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="MAIN_CLASS_NAME" value="com.alibaba.middleware.race.RandomFileGenerator" />
+      <option name="MAIN_CLASS_NAME" value="com.alibaba.middleware.race.TestInMultipleDisk" />
       <option name="VM_PARAMETERS" />
       <option name="PROGRAM_PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -417,6 +415,29 @@
         </pattern>
       </extension>
       <option name="MAIN_CLASS_NAME" value="com.alibaba.middleware.race.OrderSystemImpl" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="order-system" />
+      <envs />
+      <RunnerSettings RunnerId="JProfiler">
+        <option name="WINDOW" value="false" />
+      </RunnerSettings>
+      <method />
+    </configuration>
+    <configuration default="false" name="TestInSingleDisk" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="com.alibaba.middleware.race.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="com.alibaba.middleware.race.TestInSingleDisk" />
       <option name="VM_PARAMETERS" />
       <option name="PROGRAM_PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -628,19 +649,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Application.OrderSystemImpl" />
-      <item index="1" class="java.lang.String" itemvalue="Application.Test" />
-      <item index="2" class="java.lang.String" itemvalue="Application.TestByCaseFile" />
-      <item index="3" class="java.lang.String" itemvalue="Application.RandomFileGenerator" />
-      <item index="4" class="java.lang.String" itemvalue="Application.OrderSystemImpl (1)" />
+      <item index="0" class="java.lang.String" itemvalue="Application.Test" />
+      <item index="1" class="java.lang.String" itemvalue="Application.TestByCaseFile" />
+      <item index="2" class="java.lang.String" itemvalue="Application.TestInMultipleDisk" />
+      <item index="3" class="java.lang.String" itemvalue="Application.OrderSystemImpl (1)" />
+      <item index="4" class="java.lang.String" itemvalue="Application.TestInSingleDisk" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Application.RandomFileGenerator" />
-        <item index="1" class="java.lang.String" itemvalue="Application.OrderSystemImpl (1)" />
-        <item index="2" class="java.lang.String" itemvalue="Application.TestByCaseFile" />
-        <item index="3" class="java.lang.String" itemvalue="Application.Test" />
-        <item index="4" class="java.lang.String" itemvalue="Application.OrderSystemImpl" />
+        <item index="0" class="java.lang.String" itemvalue="Application.TestInSingleDisk" />
+        <item index="1" class="java.lang.String" itemvalue="Application.TestByCaseFile" />
+        <item index="2" class="java.lang.String" itemvalue="Application.TestInMultipleDisk" />
+        <item index="3" class="java.lang.String" itemvalue="Application.OrderSystemImpl (1)" />
+        <item index="4" class="java.lang.String" itemvalue="Application.Test" />
       </list>
     </recent_temporary>
   </component>
@@ -664,7 +685,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -674,7 +695,7 @@
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.30444205" sideWeight="0.49791014" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.30444205" sideWeight="0.49791014" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32936078" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24895833" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -705,27 +726,23 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="184" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java</url>
+          <line>144</line>
+          <properties />
+          <option name="timeStamp" value="184" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="185" />
     </breakpoint-manager>
-    <watches-manager>
-      <configuration name="Application">
-        <watch expression="Utils.ParseEntryStrToMap(r).entrySet()" language="JAVA" custom="" />
-        <watch expression="orderLs.entrySet()" language="JAVA" custom="" />
-      </configuration>
-    </watches-manager>
+    <watches-manager />
   </component>
   <component name="antWorkspaceConfiguration">
     <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_45/src.zip!/java/util/Queue.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.67064846">
-          <caret line="198" column="6" selection-start-line="198" selection-start-column="6" selection-end-line="198" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_45/src.zip!/java/io/BufferedInputStream.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33258426">
@@ -800,7 +817,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.6757679">
           <caret line="18" column="15" selection-start-line="18" selection-start-column="15" selection-end-line="18" selection-end-column="15" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -878,7 +894,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="21" column="42" selection-start-line="21" selection-start-column="42" selection-end-line="21" selection-end-column="42" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -893,10 +908,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33333334">
           <caret line="1489" column="15" selection-start-line="1489" selection-start-column="15" selection-end-line="1489" selection-end-column="15" />
-          <folding>
-            <element signature="e#58145#58146#0" expanded="false" />
-            <element signature="e#58182#58183#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -904,7 +915,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="9" column="19" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -968,7 +978,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.06653226">
           <caret line="99" column="11" selection-start-line="99" selection-start-column="11" selection-end-line="99" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -976,7 +985,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.3326613">
           <caret line="93" column="11" selection-start-line="93" selection-start-column="11" selection-end-line="93" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1019,7 +1027,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="105" column="21" selection-start-line="105" selection-start-column="21" selection-end-line="105" selection-end-column="21" />
-          <folding />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1027,10 +1037,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33333334">
           <caret line="88" column="11" selection-start-line="88" selection-start-column="11" selection-end-line="88" selection-end-column="11" />
-          <folding>
-            <element signature="e#2308#2309#0" expanded="false" />
-            <element signature="e#2344#2345#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1038,7 +1044,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.07258064">
           <caret line="17" column="20" selection-start-line="17" selection-start-column="20" selection-end-line="17" selection-end-column="20" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1046,7 +1051,11 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="63" column="57" selection-start-line="63" selection-start-column="57" selection-end-line="63" selection-end-column="57" />
-          <folding />
+          <folding>
+            <element signature="imports" expanded="false" />
+            <element signature="e#2670#2671#0" expanded="false" />
+            <element signature="e#2726#2727#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1054,6 +1063,40 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.46516854">
           <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestInMultipleDisk.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="75" column="9" selection-start-line="75" selection-start-column="9" selection-end-line="75" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33215547">
+          <caret line="144" column="0" selection-start-line="144" selection-start-column="0" selection-end-line="144" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="133" column="0" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
+          <folding>
+            <element signature="method#SortBuyerOffset#0;class#OrderSystemImpl#0" expanded="false" />
+            <element signature="method#SortOffsetParallel#0;class#OrderSystemImpl#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="19" column="33" selection-start-line="19" selection-start-column="33" selection-end-line="19" selection-end-column="33" />
           <folding />
         </state>
       </provider>
@@ -1066,39 +1109,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/diskio/DiskBytesWriter.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/TestInSingleDisk.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="19" column="22" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
+        <state vertical-scroll-proportion="0.54679805">
+          <caret line="95" column="0" selection-start-line="95" selection-start-column="0" selection-end-line="95" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/OrderSystemImpl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="307" column="0" selection-start-line="307" selection-start-column="0" selection-end-line="307" selection-end-column="0" />
-          <folding>
-            <element signature="method#SortBuyerOffset#0;class#OrderSystemImpl#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/Utils.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="170" column="0" selection-start-line="170" selection-start-column="0" selection-end-line="170" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/alibaba/middleware/race/RandomFileGenerator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="3.4630542">
-          <caret line="94" column="32" selection-start-line="94" selection-start-column="32" selection-end-line="94" selection-end-column="32" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>

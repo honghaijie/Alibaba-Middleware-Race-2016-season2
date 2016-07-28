@@ -30,7 +30,7 @@ public class DiskStringReader {
     BlockingQueue<ReadEntry> q;
     BufferedReader br;
     Thread t;
-    int bufferSize = 2 * 1024 * 1024;
+    int bufferSize = 8 * 1024;
     int capacity = 1000;
     Iterator<String> files;
     String currentFilename = null;

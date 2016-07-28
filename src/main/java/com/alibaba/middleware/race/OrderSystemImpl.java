@@ -73,7 +73,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     TreeMap<Tuple<Long, Long>, Integer> buyerBlockMapper = new TreeMap<>();
 
-    ConcurrentMap<String, String> attrToTable = new ConcurrentHashMap<>(10000);
+    Map<String, String> attrToTable = new HashMap<>(10000);
     AtomicLong orderEntriesCount = new AtomicLong(0L);
 
     //WARNING
@@ -129,11 +129,13 @@ public class OrderSystemImpl implements OrderSystem {
     private long ExtractGoodOffset(List<String> goodFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
         final DiskStringReader reader = new DiskStringReader(goodFiles);
-        Thread ths[] = new Thread[2];
+        int threadNumber = 2;
+        Thread ths[] = new Thread[threadNumber];
 
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < threadNumber; ++i) {
             ths[i] = new Thread() {
                 public void run() {
+                    Map<String, String> threadAttrTable = new HashMap<>();
                     long threadTotal = 0L;
                     while (true) {
                         DiskStringReader.ReadEntry tp = reader.readLineAndFileName();
@@ -144,7 +146,7 @@ public class OrderSystemImpl implements OrderSystem {
                         Map<String, String> attr = Utils.ParseEntryStrToMap(line);
                         String goodid = attr.get("goodid");
                         for (Map.Entry<String, String> t : attr.entrySet()) {
-                            attrToTable.put(t.getKey(), Config.GoodTable);
+                            threadAttrTable.put(t.getKey(), Config.GoodTable);
                         }
                         long goodIdHashVal = Utils.hash(goodid);
 
@@ -163,11 +165,14 @@ public class OrderSystemImpl implements OrderSystem {
                         ++threadTotal;
                     }
                     total.addAndGet(threadTotal);
+                    synchronized (attrToTable) {
+                        attrToTable.putAll(threadAttrTable);
+                    }
                 }
             };
             ths[i].start();
         }
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < threadNumber; ++i) {
             ths[i].join();
         }
         return total.get();
@@ -175,11 +180,13 @@ public class OrderSystemImpl implements OrderSystem {
     private long ExtractBuyerOffset(List<String> buyerFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
         final DiskStringReader reader = new DiskStringReader(buyerFiles);
-        Thread ths[] = new Thread[2];
+        int threadNumber = 2;
+        Thread ths[] = new Thread[threadNumber];
 
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < threadNumber; ++i) {
             ths[i] = new Thread() {
                 public void run() {
+                    Map<String, String> threadAttrTable = new HashMap<>();
                     long threadTotal = 0L;
                     String filename = null;
                     while (true) {
@@ -191,7 +198,7 @@ public class OrderSystemImpl implements OrderSystem {
                         long offset = tp.offset;
                         Map<String, String> attr = Utils.ParseEntryStrToMap(line);
                         for (Map.Entry<String, String> t : attr.entrySet()) {
-                            attrToTable.put(t.getKey(), Config.BuyerTable);
+                            threadAttrTable.put(t.getKey(), Config.BuyerTable);
                         }
                         String buyerid = attr.get("buyerid");
                         long buyerIdHashVal = Utils.hash(buyerid);
@@ -211,11 +218,14 @@ public class OrderSystemImpl implements OrderSystem {
                         ++threadTotal;
                     }
                     total.addAndGet(threadTotal);
+                    synchronized (attrToTable) {
+                        attrToTable.putAll(threadAttrTable);
+                    }
                 }
             };
             ths[i].start();
         };
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < threadNumber; ++i) {
             ths[i].join();
         }
 
@@ -225,13 +235,15 @@ public class OrderSystemImpl implements OrderSystem {
     private long ExtractOrderOffset(List<String> orderFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
         final DiskStringReader reader = new DiskStringReader(orderFiles);
-        Thread ths[] = new Thread[2];
-        for (int i = 0; i < 2; ++i) {
+        int threadNumber = 2;
+        Thread ths[] = new Thread[threadNumber];
+        for (int i = 0; i < threadNumber; ++i) {
             ths[i] = new Thread() {
                 public void run() {
                     String line;
                     String filename = null;
                     long threadTotal = 0;
+                    Map<String, String> threadAttrTable = new HashMap<>();
                     while (true) {
                         DiskStringReader.ReadEntry tp = reader.readLineAndFileName();
                         if (tp == null) break;
@@ -241,7 +253,7 @@ public class OrderSystemImpl implements OrderSystem {
                         long offset = tp.offset;
                         Map<String, String> attr = Utils.ParseEntryStrToMap(line);
                         for (Map.Entry<String, String> t : attr.entrySet()) {
-                            attrToTable.put(t.getKey(), Config.OrderTable);
+                            threadAttrTable.put(t.getKey(), Config.OrderTable);
                         }
                         long orderId = Long.parseLong(attr.get("orderid"));
                         String goodid = attr.get("goodid");
@@ -269,12 +281,15 @@ public class OrderSystemImpl implements OrderSystem {
 
                     }
                     total.addAndGet(threadTotal);
+                    synchronized (attrToTable) {
+                        attrToTable.putAll(threadAttrTable);
+                    }
                 }
             };
             ths[i].start();
 
         }
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < threadNumber; ++i) {
             ths[i].join();
         }
         return total.get();
