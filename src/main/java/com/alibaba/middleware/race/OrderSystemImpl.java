@@ -35,9 +35,9 @@ public class OrderSystemImpl implements OrderSystem {
     private SimpleCache rawDataCache = new SimpleCache(49999);
 
 
-    static final int orderBlockNum = 40;
-    static final int buyerBlockNum = 8;
-    static final int goodBlockNum = 8;
+    static final int orderBlockNum = 150;
+    static final int buyerBlockNum = 20;
+    static final int goodBlockNum = 20;
     static final int bufferSize = 64 * 1024;
     static final int memoryOrderOrderIndexSize = 2000000;
     static final int memoryOrderGoodIndexSize = 40000;
