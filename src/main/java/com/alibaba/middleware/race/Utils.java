@@ -141,15 +141,14 @@ public class Utils {
         return ans;
     }
 
-    public static long GetOrderId(byte[] s) {
-        return bytesToLong(Arrays.copyOf(s, 8));
-    }
     public static String GetDisk(String path) {
-        String[] sp = path.split("/");
-        if (sp.length == 1) {
-            return path.split("\\\\")[0];
+        int pos = path.indexOf('/', 1);
+        if (pos != -1) {
+            return path.substring(1, pos);
+        } else {
+            pos = path.indexOf('\\');
+            return path.substring(0, pos);
         }
-        return sp[1];
     }
     public static List<List<String>> GroupByDisk(List<String> files) {
         Map<String, List<String>> ans = new TreeMap<>();
@@ -198,5 +197,22 @@ public class Utils {
         long b = m - (a << 45);
         return new Tuple<>(a, b);
     }
+    public static int UTF8Length(CharSequence sequence) {
+        int count = 0;
+        for (int i = 0, len = sequence.length(); i < len; i++) {
+            char ch = sequence.charAt(i);
+            if (ch <= 0x7F) {
+                count++;
+            } else if (ch <= 0x7FF) {
+                count += 2;
+            } else if (Character.isHighSurrogate(ch)) {
+                count += 4;
+                ++i;
+            } else {
+                count += 3;
+            }
+        }
+        return count;
 
+    }
 }

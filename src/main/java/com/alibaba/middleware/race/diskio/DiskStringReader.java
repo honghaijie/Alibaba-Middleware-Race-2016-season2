@@ -1,8 +1,10 @@
 package com.alibaba.middleware.race.diskio;
 
 import com.alibaba.middleware.race.Tuple;
+import com.alibaba.middleware.race.Utils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,13 +16,25 @@ import java.util.concurrent.BlockingQueue;
  * Created by hahong on 2016/7/23.
  */
 public class DiskStringReader {
-    BlockingQueue<Tuple<String, String>> q;
+    public class ReadEntry {
+        public String content;
+        public String filename;
+        public long offset;
+
+        public ReadEntry(String content, String filename, long offset) {
+            this.content = content;
+            this.filename = filename;
+            this.offset = offset;
+        }
+    }
+    BlockingQueue<ReadEntry> q;
     BufferedReader br;
     Thread t;
     int bufferSize = 2 * 1024 * 1024;
-    int capacity = 100000;
+    int capacity = 1000;
     Iterator<String> files;
     String currentFilename = null;
+    long currentOffset = 0L;
     public DiskStringReader(Collection<String> filenames) {
         try {
             files = filenames.iterator();
@@ -38,7 +52,8 @@ public class DiskStringReader {
                     try {
                         if (br == null) {
                             if (!files.hasNext()) {
-                                q.put(new Tuple<String, String>("#", null));
+                                q.put(new ReadEntry("#", null, -1));
+                                q.put(new ReadEntry("#", null, -1));
                                 break;
                             }
                             currentFilename = files.next();
@@ -54,8 +69,10 @@ public class DiskStringReader {
                         }
                         String msg = br.readLine();
                         if (msg != null) {
-                            q.put(new Tuple<String, String>(msg, currentFilename));
+                            q.put(new ReadEntry(msg, currentFilename, currentOffset));
+                            currentOffset += Utils.UTF8Length(msg) + 1;
                         } else {
+                            currentOffset = 0L;
                             br.close();
                             br = null;
                         }
@@ -70,15 +87,15 @@ public class DiskStringReader {
         t.start();
     }
     public String readLine() {
-        Tuple<String, String> t = readLineAndFileName();
+        ReadEntry t = readLineAndFileName();
         if (t == null) return null;
-        return t.x;
+        return t.content;
     }
-    public Tuple<String, String> readLineAndFileName() {
-        Tuple<String, String> s = null;
+    public ReadEntry readLineAndFileName() {
+        ReadEntry s = null;
         try {
             s = q.take();
-            if (s.y == null) {
+            if (s.filename == null) {
                 s = null;
             }
         } catch (InterruptedException e) {
