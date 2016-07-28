@@ -12,9 +12,14 @@ import java.util.Random;
  * Created by hahong on 2016/7/23.
  */
 public class RandomFileGenerator {
+    /*
     static String orderFile = "D:\\middleware-data\\random\\random-order.txt";
     static String goodFile = "D:\\middleware-data\\random\\random-good.txt";
     static String buyerFile = "D:\\middleware-data\\random\\random-buyer.txt";
+    */
+    static String orderFile = "C:\\Users\\hahong\\Documents\\tmp\\random-order.txt";
+    static String goodFile = "C:\\Users\\hahong\\Documents\\tmp\\random-good.txt";
+    static String buyerFile = "C:\\Users\\hahong\\Documents\\tmp\\random-buyer.txt";
     static List<String> buyerIds = new ArrayList<>();
     static List<String> goodIds = new ArrayList<>();
     static long buyerCount = 100000;
@@ -78,7 +83,11 @@ public class RandomFileGenerator {
         System.out.println("Generate complete.");
         OrderSystemImpl impl = new OrderSystemImpl();
         long startTime = System.currentTimeMillis();
-        impl.construct(Arrays.asList(orderFile), Arrays.asList(buyerFile), Arrays.asList(goodFile), Arrays.asList("D:\\middleware-data\\random\\store\\"));
+        List<String> orderFiles = Arrays.asList("C:\\Users\\hahong\\Documents\\tmp\\random-order1", "C:\\Users\\hahong\\Documents\\tmp\\random-order2", "D:\\middleware-data\\random\\random-order3", "D:\\middleware-data\\random\\random-order4");
+        List<String> buyerFiles = Arrays.asList("C:\\Users\\hahong\\Documents\\tmp\\random-buyer1", "D:\\middleware-data\\random\\random-buyer2");
+        List<String> goodFiles = Arrays.asList("C:\\Users\\hahong\\Documents\\tmp\\random-good1", "D:\\middleware-data\\random\\random-good2");
+        List<String> storeFolders = Arrays.asList("C:\\Users\\hahong\\Documents\\tmp\\store\\", "D:\\middleware-data\\random\\store\\");
+        impl.construct(orderFiles, buyerFiles, goodFiles, storeFolders);
         System.out.println("Construct complete.");
         System.out.printf("Time: %d.\n", (System.currentTimeMillis() - startTime) / 1000);
         Random rd = new Random();
