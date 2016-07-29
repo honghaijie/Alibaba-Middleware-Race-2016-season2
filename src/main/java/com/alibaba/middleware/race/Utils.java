@@ -236,4 +236,25 @@ public class Utils {
         }
         return ans;
     }
+    public static List<List<String>> SplitFiles(List<String> files1, List<String> files2, int num) {
+        List<List<String>> ans = new ArrayList<>();
+        List<Long> lengths = new ArrayList<>();
+        for (int i = 0; i < num; ++i) {
+            ans.add(new ArrayList<String>());
+            lengths.add(0L);
+        }
+        for (String file : files1) {
+            File f = new File(file);
+            long len = f.length();
+            int pos = 0;
+            for (int i = 0; i < num; ++i) {
+                if (lengths.get(i) < lengths.get(pos)) {
+                    pos = i;
+                }
+            }
+            ans.get(pos).add(file);
+            lengths.set(pos, lengths.get(pos) + len);
+        }
+        return ans;
+    }
 }

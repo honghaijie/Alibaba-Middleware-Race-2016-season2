@@ -36,9 +36,9 @@ public class OrderSystemImpl implements OrderSystem {
     private SimpleCache rawDataCache = new SimpleCache(49999);
 
 
-    static final int orderBlockNum = 300;
-    static final int buyerBlockNum = 40;
-    static final int goodBlockNum = 40;
+    static final int orderBlockNum = 500;
+    static final int buyerBlockNum = 50;
+    static final int goodBlockNum = 50;
     static final int bufferSize = 2 * 1024 * 1024;
     static final int memoryOrderOrderIndexSize = 2000000;
     static final int memoryOrderGoodIndexSize = 40000;
@@ -298,51 +298,71 @@ public class OrderSystemImpl implements OrderSystem {
         }
         return total.get();
     }
-    private Map<String, TreeMap<Long, Long>> SortOffset(List<String> unOrderedFiles, List<String> orderedFiles, long ratio) throws IOException, KeyException, InterruptedException {
-        Map<String, TreeMap<Long, Long>> res = new HashMap<>();
-        for (int i = 0; i < unOrderedFiles.size(); ++i) {
-            String unOrderedFilename = unOrderedFiles.get(i);
-            String orderedFilename = orderedFiles.get(i);
-            File file = new File(unOrderedFilename);
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file), bufferSize);
-            int entryLength = 16;
-            long offset = 0;
-            //Map<Long, Tuple<Long, Long>> indexMapper = new TreeMap<Long, Tuple<Long, Long>>();
-            List<Tuple<Long, Long>> indexList = new ArrayList<>();
-            while (true) {
-                byte[] entryBytes = new byte[entryLength];
-                int len = bis.read(entryBytes);
-                if (len == -1) break;
-                long[] e = Utils.byteArrayToLongArray(entryBytes);
-                indexList.add(new Tuple<Long, Long>(e[0], e[1]));
-            }
-            bis.close();
-            Collections.sort(indexList, new Comparator<Tuple<Long, Long>>() {
-                @Override
-                public int compare(Tuple<Long, Long> o1, Tuple<Long, Long> o2) {
-                    return o1.x.compareTo(o2.x);
-                }
-            });
-            TreeMap<Long, Long> currentMap = new TreeMap<>();
-            BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(orderedFilename), bufferSize);
-            int cnt = 0;
-            for (int idx = 0; idx < indexList.size(); ++idx) {
-                Tuple<Long, Long> e = indexList.get(idx);
+    private Map<String, TreeMap<Long, Long>> SortOffset(final List<String> unOrderedFiles, final List<String> orderedFiles, final long ratio) throws IOException, KeyException, InterruptedException {
+        final Map<String, TreeMap<Long, Long>> res = new HashMap<>();
+        final int threadNum = 2;
+        Thread[] ths = new Thread[threadNum];
+        for (int t = 0; t < threadNum; ++t) {
+            final int tid = t;
+            ths[t] = new Thread(){
+                public void run() {
+                    try {
+                        for (int i = 0; i < unOrderedFiles.size(); ++i) {
+                            if (i % threadNum != tid) continue;
+                            String unOrderedFilename = unOrderedFiles.get(i);
+                            String orderedFilename = orderedFiles.get(i);
+                            File file = new File(unOrderedFilename);
+                            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file), bufferSize);
+                            int entryLength = 16;
+                            long offset = 0;
+                            //Map<Long, Tuple<Long, Long>> indexMapper = new TreeMap<Long, Tuple<Long, Long>>();
+                            List<Tuple<Long, Long>> indexList = new ArrayList<>();
+                            while (true) {
+                                byte[] entryBytes = new byte[entryLength];
+                                int len = bis.read(entryBytes);
+                                if (len == -1) break;
+                                long[] e = Utils.byteArrayToLongArray(entryBytes);
+                                indexList.add(new Tuple<Long, Long>(e[0], e[1]));
+                            }
+                            bis.close();
+                            Collections.sort(indexList, new Comparator<Tuple<Long, Long>>() {
+                                @Override
+                                public int compare(Tuple<Long, Long> o1, Tuple<Long, Long> o2) {
+                                    return o1.x.compareTo(o2.x);
+                                }
+                            });
+                            TreeMap<Long, Long> currentMap = new TreeMap<>();
+                            BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(orderedFilename), bufferSize);
+                            int cnt = 0;
+                            for (int idx = 0; idx < indexList.size(); ++idx) {
+                                Tuple<Long, Long> e = indexList.get(idx);
 
-                fos.write(Utils.longToBytes(e.x));
-                fos.write(Utils.longToBytes(e.y));
-                if (idx == 0 || !indexList.get(idx - 1).x.equals(e.x)) {
-                    ++cnt;
-                    if (cnt % ratio == 0) {
-                        currentMap.put(e.x, offset);
+                                fos.write(Utils.longToBytes(e.x));
+                                fos.write(Utils.longToBytes(e.y));
+                                if (idx == 0 || !indexList.get(idx - 1).x.equals(e.x)) {
+                                    ++cnt;
+                                    if (cnt % ratio == 0) {
+                                        currentMap.put(e.x, offset);
+                                    }
+                                }
+                                offset += entryLength;
+                            }
+                            currentMap.put(Long.MIN_VALUE, 0L);
+                            currentMap.put(Long.MAX_VALUE, offset);
+                            synchronized (res) {
+                                res.put(orderedFilename, currentMap);
+                            }
+                            fos.close();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
-                offset += entryLength;
-            }
-            currentMap.put(Long.MIN_VALUE, 0L);
-            currentMap.put(Long.MAX_VALUE, offset);
-            res.put(orderedFilename, currentMap);
-            fos.close();
+            };
+            ths[t].start();
+        }
+        for (int i = 0; i < threadNum; ++i) {
+            ths[i].join();
         }
         return res;
     }
