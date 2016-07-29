@@ -128,11 +128,12 @@ public class OrderSystemImpl implements OrderSystem {
 
     private long ExtractGoodOffset(List<String> goodFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
-        final DiskStringReader reader = new DiskStringReader(goodFiles);
         int threadNumber = 2;
         Thread ths[] = new Thread[threadNumber];
+        List<List<String>> threadFiles = Utils.SplitFiles(goodFiles, threadNumber);
 
         for (int i = 0; i < threadNumber; ++i) {
+            final DiskStringReader reader = new DiskStringReader(threadFiles.get(i));
             ths[i] = new Thread() {
                 public void run() {
                     Map<String, String> threadAttrTable = new HashMap<>();
@@ -179,11 +180,12 @@ public class OrderSystemImpl implements OrderSystem {
     }
     private long ExtractBuyerOffset(List<String> buyerFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
-        final DiskStringReader reader = new DiskStringReader(buyerFiles);
         int threadNumber = 2;
         Thread ths[] = new Thread[threadNumber];
+        List<List<String>> threadFiles = Utils.SplitFiles(buyerFiles, threadNumber);
 
         for (int i = 0; i < threadNumber; ++i) {
+            final DiskStringReader reader = new DiskStringReader(threadFiles.get(i));
             ths[i] = new Thread() {
                 public void run() {
                     Map<String, String> threadAttrTable = new HashMap<>();
@@ -234,10 +236,12 @@ public class OrderSystemImpl implements OrderSystem {
 
     private long ExtractOrderOffset(List<String> orderFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
-        final DiskStringReader reader = new DiskStringReader(orderFiles);
+
         int threadNumber = 2;
+        List<List<String>> threadFiles = Utils.SplitFiles(orderFiles, threadNumber);
         Thread ths[] = new Thread[threadNumber];
         for (int i = 0; i < threadNumber; ++i) {
+            final DiskStringReader reader = new DiskStringReader(threadFiles.get(i));
             ths[i] = new Thread() {
                 public void run() {
                     String line;
@@ -739,10 +743,14 @@ public class OrderSystemImpl implements OrderSystem {
             }
         };
         t.start();
-        try {
-            Thread.sleep(3550 * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        synchronized (constructFinishNotifier) {
+            while (!constructFinish) {
+                try {
+                    constructFinishNotifier.wait(3550 * 1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
     }

@@ -12,11 +12,11 @@ import java.util.Random;
 /**
  * Created by hahong on 2016/7/23.
  */
-public class TestInSingleDisk {
+public class TestInUbuntuServer {
 
-    static String orderFile = "D:\\middleware-data\\random\\random-order.txt";
-    static String goodFile = "D:\\middleware-data\\random\\random-good.txt";
-    static String buyerFile = "D:\\middleware-data\\random\\random-buyer.txt";
+    static String orderFile = "/home/ubuntu/random-order.txt";
+    static String goodFile = "/home/ubuntu/random-good.txt";
+    static String buyerFile = "/home/ubuntu/random-buyer.txt";
     static List<String> buyerIds = new ArrayList<>();
     static List<String> goodIds = new ArrayList<>();
     static long buyerCount = 100000;
@@ -37,7 +37,7 @@ public class TestInSingleDisk {
         {
             //FileWriter out = new FileWriter(new File(buyerFile));
 
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(buyerFile), "UTF-8"), 1024*1024);
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(buyerFile), "UTF-8"), 64*1024);
             for (String buyerId : buyerIds) {
                 out.append(String.format("buyerid:%s\tb2:%s\tb3:%s\tb4:%s\tb5:%s\tb6:%s\tb7:%s\tb8:%s\n", buyerId, buyerId, buyerId, buyerId, buyerId, buyerId, buyerId, buyerId));
             }
@@ -49,7 +49,7 @@ public class TestInSingleDisk {
 
         try
         {
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(goodFile), "UTF-8"), 1024*1024);
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(goodFile), "UTF-8"), 64*1024);
             for (String goodId : goodIds) {
                 out.append(String.format("goodid:%s\tb2:%s\tb3:%s\tb4:%s\tb5:%s\tb6:%s\tb7:%s\tb8:%s\n", goodId, goodId, goodId, goodId, goodId, goodId, goodId, goodId));
             }
@@ -62,7 +62,7 @@ public class TestInSingleDisk {
         try
         {
             Random r = new Random();
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(orderFile), "UTF-8"), 1024*1024);
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(orderFile), "UTF-8"), 64*1024);
             for (long i = 0; i < orderCount; ++i) {
                 String rd = java.util.UUID.randomUUID().toString();
                 String buyerId = buyerIds.get(r.nextInt((int) buyerCount));
@@ -76,12 +76,12 @@ public class TestInSingleDisk {
         }
     }
     public static void main(String args[]) throws IOException, InterruptedException {
-        GenerateData();
+        //GenerateData();
         System.out.println("Generate complete.");
         OrderSystemImpl impl = new OrderSystemImpl();
         long startTime = System.currentTimeMillis();
 
-        impl.construct(Arrays.asList(orderFile), Arrays.asList(buyerFile), Arrays.asList(goodFile), Arrays.asList("D:\\middleware-data\\random\\"));
+        impl.construct(Arrays.asList(orderFile), Arrays.asList(buyerFile), Arrays.asList(goodFile), Arrays.asList("/home/ubuntu/store/"));
         System.out.println("Construct complete.");
         System.out.printf("Time: %d.\n", (System.currentTimeMillis() - startTime) / 1000);
         Random rd = new Random();
