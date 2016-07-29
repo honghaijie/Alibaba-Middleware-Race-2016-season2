@@ -411,7 +411,8 @@ public class OrderSystemImpl implements OrderSystem {
                                 offset += entryLength;
                             }
                             currentMap.put(indexList.get(0).x, 0L);
-                            currentMap.put(indexList.get(indexList.size() - 1).x, offset);
+                            Tuple<Long, Long> upperBound = new Tuple<>(indexList.get(indexList.size() - 1).x.x, indexList.get(indexList.size() - 1).x.y + 1);
+                            currentMap.put(upperBound, offset);
                             synchronized (res) {
                                 res.put(orderedFilename, currentMap);
                             }
