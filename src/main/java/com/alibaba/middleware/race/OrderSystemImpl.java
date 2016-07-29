@@ -128,7 +128,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     private long ExtractGoodOffset(List<String> goodFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
-        int threadNumber = 2;
+        int threadNumber = 4;
         Thread ths[] = new Thread[threadNumber];
         List<List<String>> threadFiles = Utils.SplitFiles(goodFiles, threadNumber);
 
@@ -180,7 +180,7 @@ public class OrderSystemImpl implements OrderSystem {
     }
     private long ExtractBuyerOffset(List<String> buyerFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
-        int threadNumber = 2;
+        int threadNumber = 4;
         Thread ths[] = new Thread[threadNumber];
         List<List<String>> threadFiles = Utils.SplitFiles(buyerFiles, threadNumber);
 
@@ -237,8 +237,8 @@ public class OrderSystemImpl implements OrderSystem {
     private long ExtractOrderOffset(List<String> orderFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
 
-        int threadNumber = 2;
-        List<List<String>> threadFiles = Utils.SplitFiles(orderFiles, threadNumber);
+        int threadNumber = 4;
+        final List<List<String>> threadFiles = Utils.SplitFiles(orderFiles, threadNumber);
         Thread ths[] = new Thread[threadNumber];
         for (int i = 0; i < threadNumber; ++i) {
             final DiskStringReader reader = new DiskStringReader(threadFiles.get(i));

@@ -76,7 +76,7 @@ public class TestInSingleDisk {
         }
     }
     public static void main(String args[]) throws IOException, InterruptedException {
-        GenerateData();
+        //GenerateData();
         System.out.println("Generate complete.");
         OrderSystemImpl impl = new OrderSystemImpl();
         long startTime = System.currentTimeMillis();
