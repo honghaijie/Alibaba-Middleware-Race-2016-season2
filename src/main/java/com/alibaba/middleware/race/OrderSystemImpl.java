@@ -39,7 +39,7 @@ public class OrderSystemImpl implements OrderSystem {
     static final int orderBlockNum = 500;
     static final int buyerBlockNum = 50;
     static final int goodBlockNum = 50;
-    static final int bufferSize = 2 * 1024 * 1024;
+    static final int bufferSize = 256 * 1024;
     static final int memoryOrderOrderIndexSize = 2000000;
     static final int memoryOrderGoodIndexSize = 40000;
     static final int memoryOrderBuyerIndexSize = 2000000;
@@ -128,7 +128,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     private long ExtractGoodOffset(List<String> goodFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
-        int threadNumber = 4;
+        int threadNumber = 16;
         Thread ths[] = new Thread[threadNumber];
         List<List<String>> threadFiles = Utils.SplitFiles(goodFiles, threadNumber);
 
@@ -180,7 +180,7 @@ public class OrderSystemImpl implements OrderSystem {
     }
     private long ExtractBuyerOffset(List<String> buyerFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
-        int threadNumber = 4;
+        int threadNumber = 16;
         Thread ths[] = new Thread[threadNumber];
         List<List<String>> threadFiles = Utils.SplitFiles(buyerFiles, threadNumber);
 
@@ -237,7 +237,7 @@ public class OrderSystemImpl implements OrderSystem {
     private long ExtractOrderOffset(List<String> orderFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
 
-        int threadNumber = 4;
+        int threadNumber = 16;
         final List<List<String>> threadFiles = Utils.SplitFiles(orderFiles, threadNumber);
         Thread ths[] = new Thread[threadNumber];
         for (int i = 0; i < threadNumber; ++i) {
@@ -300,7 +300,7 @@ public class OrderSystemImpl implements OrderSystem {
     }
     private Map<String, TreeMap<Long, Long>> SortOffset(final List<String> unOrderedFiles, final List<String> orderedFiles, final long ratio) throws IOException, KeyException, InterruptedException {
         final Map<String, TreeMap<Long, Long>> res = new HashMap<>();
-        final int threadNum = 2;
+        final int threadNum = 3;
         Thread[] ths = new Thread[threadNum];
         for (int t = 0; t < threadNum; ++t) {
             final int tid = t;
@@ -366,47 +366,67 @@ public class OrderSystemImpl implements OrderSystem {
         }
         return res;
     }
-    private Map<String, TreeMap<Tuple<Long, Long>, Long>> SortBuyerOffset(List<String> unOrderedFiles, List<String> orderedFiles, long ratio) throws IOException, KeyException, InterruptedException {
-        Map<String, TreeMap<Tuple<Long, Long>, Long>> res = new HashMap<>();
+    private Map<String, TreeMap<Tuple<Long, Long>, Long>> SortBuyerOffset(final List<String> unOrderedFiles, final List<String> orderedFiles, final long ratio) throws IOException, KeyException, InterruptedException {
+        final Map<String, TreeMap<Tuple<Long, Long>, Long>> res = new HashMap<>();
+        final int threadNum = 3;
+        Thread[] ths = new Thread[threadNum];
+        for (int t = 0; t < threadNum; ++t) {
+            final int tid = t;
+            ths[t] = new Thread(){
+                public void run() {
+                    try {
+                        for (int i = 0; i < unOrderedFiles.size(); ++i) {
+                            if (i % threadNum != tid) continue;
+                            String unOrderedFilename = unOrderedFiles.get(i);
+                            String orderedFilename = orderedFiles.get(i);
+                            File file = new File(unOrderedFilename);
+                            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file), bufferSize);
+                            int entryLength = 24;
+                            long offset = 0;
+                            //Map<Long, Tuple<Long, Long>> indexMapper = new TreeMap<Long, Tuple<Long, Long>>();
+                            List<Tuple<Tuple<Long, Long>, Long>> indexList = new ArrayList<>();
+                            while (true) {
+                                byte[] entryBytes = new byte[entryLength];
+                                int len = bis.read(entryBytes);
+                                if (len == -1) break;
+                                long[] e = Utils.byteArrayToLongArray(entryBytes);
+                                indexList.add(new Tuple<Tuple<Long, Long>, Long>(new Tuple<Long, Long>(e[0], e[1]), e[2]));
 
-        for (int i = 0; i < unOrderedFiles.size(); ++i) {
-            String unOrderedFilename = unOrderedFiles.get(i);
-            String orderedFilename = orderedFiles.get(i);
-            File file = new File(unOrderedFilename);
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file), bufferSize);
-            int entryLength = 24;
-            long offset = 0;
-            //Map<Long, Tuple<Long, Long>> indexMapper = new TreeMap<Long, Tuple<Long, Long>>();
-            List<Tuple<Tuple<Long, Long>, Long>> indexList = new ArrayList<>();
-            while (true) {
-                byte[] entryBytes = new byte[entryLength];
-                int len = bis.read(entryBytes);
-                if (len == -1) break;
-                long[] e = Utils.byteArrayToLongArray(entryBytes);
-                indexList.add(new Tuple<Tuple<Long, Long>, Long>(new Tuple<Long, Long>(e[0], e[1]), e[2]));
+                            }
+                            bis.close();
+                            Collections.sort(indexList);
+                            TreeMap<Tuple<Long, Long>, Long> currentMap = new TreeMap<>();
+                            BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(orderedFilename), bufferSize);
+                            int cnt = 0;
+                            for (int idx = 0; idx < indexList.size(); ++idx) {
+                                Tuple<Tuple<Long, Long>, Long> e = indexList.get(idx);
 
-            }
-            bis.close();
-            Collections.sort(indexList);
-            TreeMap<Tuple<Long, Long>, Long> currentMap = new TreeMap<>();
-            BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(orderedFilename), bufferSize);
-            int cnt = 0;
-            for (int idx = 0; idx < indexList.size(); ++idx) {
-                Tuple<Tuple<Long, Long>, Long> e = indexList.get(idx);
+                                fos.write(Utils.longToBytes(e.x.x));
+                                fos.write(Utils.longToBytes(e.x.y));
+                                fos.write(Utils.longToBytes(e.y));
+                                ++cnt;
+                                if (cnt % ratio == 0) {
+                                    currentMap.put(e.x, offset);
+                                }
+                                offset += entryLength;
+                            }
+                            currentMap.put(indexList.get(0).x, 0L);
+                            currentMap.put(indexList.get(indexList.size() - 1).x, offset);
+                            synchronized (res) {
+                                res.put(orderedFilename, currentMap);
+                            }
 
-                fos.write(Utils.longToBytes(e.x.x));
-                fos.write(Utils.longToBytes(e.x.y));
-                fos.write(Utils.longToBytes(e.y));
-                ++cnt;
-                if (cnt % ratio == 0) {
-                    currentMap.put(e.x, offset);
+                            fos.close();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-                offset += entryLength;
-            }
-            currentMap.put(indexList.get(0).x, 0L);
-            currentMap.put(indexList.get(indexList.size() - 1).x, offset);
-            res.put(orderedFilename, currentMap);
-            fos.close();
+            };
+            ths[t].start();
+        }
+        for (int i = 0; i < threadNum; ++i) {
+            ths[i].join();
         }
         return res;
     }
@@ -797,7 +817,7 @@ public class OrderSystemImpl implements OrderSystem {
         Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
 
         for (String key : keys) {
-            if (Config.BuyerTable.equals(attrToTable.get(key))) {
+            if (Config.BuyerTable.equals(attrToTable.get(key)) && !key.equals("buyerid")) {
                 String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
                 orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
                 break;
@@ -805,7 +825,7 @@ public class OrderSystemImpl implements OrderSystem {
         }
 
         for (String key : keys) {
-            if (Config.GoodTable.equals(attrToTable.get(key))) {
+            if (Config.GoodTable.equals(attrToTable.get(key)) && !key.equals("goodid")) {
                 String goodStr = QueryGoodByGood(orderLs.get("goodid"));
                 orderLs.putAll(Utils.ParseEntryStrToMap(goodStr));
             }
@@ -895,10 +915,10 @@ public class OrderSystemImpl implements OrderSystem {
         boolean loadGoodTable = false;
         boolean loadBuyerTable = false;
         for (String key : keys) {
-            if (Config.GoodTable.equals(attrToTable.get(key))) {
+            if (Config.GoodTable.equals(attrToTable.get(key)) && !key.equals("goodid")) {
                 loadGoodTable = true;
             }
-            if (Config.BuyerTable.equals(attrToTable.get(key))) {
+            if (Config.BuyerTable.equals(attrToTable.get(key)) && !key.equals("buyerid")) {
                 loadBuyerTable = true;
             }
         }
