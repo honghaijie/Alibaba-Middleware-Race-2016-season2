@@ -129,6 +129,23 @@ public class Utils {
         return ans;
     }
 
+    public static String GetAttribute(String s, String qkey) {
+        int from = 0;
+        while (true) {
+            int spIdx = s.indexOf(':', from);
+            int nxIdx = s.indexOf('\t', spIdx);
+            if (nxIdx == -1) nxIdx = s.length();
+            String key = s.substring(from, spIdx);
+            String value = s.substring(spIdx + 1, nxIdx);
+            if (key.equals(qkey)) {
+                return value;
+            }
+            if (nxIdx == s.length()) break;
+            from = nxIdx + 1;
+        }
+        return null;
+    }
+
     public static List<Tuple<String, String>> ParseEntryStrToList(String s) {
         String[] fields = s.split("\\t");
         List<Tuple<String, String>> ans = new ArrayList<Tuple<String, String>>();

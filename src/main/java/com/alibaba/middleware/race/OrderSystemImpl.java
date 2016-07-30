@@ -254,6 +254,7 @@ public class OrderSystemImpl implements OrderSystem {
                         line = tp.content;
                         filename = tp.filename;
                         long offset = tp.offset;
+                        byte[] lineRawBytes = (line + "\n").getBytes(StandardCharsets.UTF_8);
                         Map<String, String> attr = Utils.ParseEntryStrToMap(line);
                         for (Map.Entry<String, String> t : attr.entrySet()) {
                             threadAttrTable.put(t.getKey(), Config.OrderTable);
@@ -271,7 +272,8 @@ public class OrderSystemImpl implements OrderSystem {
                         long goodHashVal = Utils.hash(goodid);
                         int goodBlockId = (int) ((goodHashVal) % orderBlockNum);
                         String goodIndexPath = unSortedOrderGoodIndexBlockFiles.get(goodBlockId);
-                        diskWriterMap.get(Utils.GetDisk(goodIndexPath)).write(goodIndexPath, Utils.longToBytes(goodHashVal, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
+                        //diskWriterMap.get(Utils.GetDisk(goodIndexPath)).write(goodIndexPath, Utils.longToBytes(goodHashVal, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
+                        diskWriterMap.get(Utils.GetDisk(goodIndexPath)).write(goodIndexPath, lineRawBytes);
 
                         long buyerHashVal = Utils.hash(buyerid);
                         Tuple<Long, Long> buyerIndexEntry = new Tuple<>(buyerHashVal, createtime);
@@ -429,6 +431,72 @@ public class OrderSystemImpl implements OrderSystem {
         }
         return res;
     }
+    private Map<String, TreeMap<Long, Long>> SortGoodRawOffset(final List<String> unOrderedFiles, final List<String> orderedFiles, final long ratio) throws IOException, KeyException, InterruptedException {
+        final Map<String, TreeMap<Long, Long>> res = new HashMap<>();
+        final int threadNum = 2;
+        Thread[] ths = new Thread[threadNum];
+        for (int t = 0; t < threadNum; ++t) {
+            final int tid = t;
+            ths[t] = new Thread(){
+                public void run() {
+                    try {
+                        for (int i = 0; i < unOrderedFiles.size(); ++i) {
+                            if (i % threadNum != tid) continue;
+                            String unOrderedFilename = unOrderedFiles.get(i);
+                            String orderedFilename = orderedFiles.get(i);
+
+                            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(unOrderedFilename), "UTF-8"), bufferSize);
+
+                            long offset = 0;
+                            //Map<Long, Tuple<Long, Long>> indexMapper = new TreeMap<Long, Tuple<Long, Long>>();
+                            List<Tuple<Long, String>> indexList = new ArrayList<>();
+                            while (true) {
+                                String line = br.readLine();
+                                if (line == null) break;
+                                long goodIdHash = Utils.hash(Utils.GetAttribute(line, "goodid"));
+                                indexList.add(new Tuple<Long, String>(goodIdHash, line));
+                            }
+                            br.close();
+                            Collections.sort(indexList, new Comparator<Tuple<Long, String>>() {
+                                @Override
+                                public int compare(Tuple<Long, String> o1, Tuple<Long, String> o2) {
+                                    return o1.x.compareTo(o2.x);
+                                }
+                            });
+                            TreeMap<Long, Long> currentMap = new TreeMap<>();
+                            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(orderedFilename), "UTF-8"), bufferSize);
+                            int cnt = 0;
+                            for (int idx = 0; idx < indexList.size(); ++idx) {
+                                Tuple<Long, String> e = indexList.get(idx);
+                                String t = e.y + "\n";
+                                bw.write(t);
+                                if (idx == 0 || !indexList.get(idx - 1).x.equals(e.x)) {
+                                    ++cnt;
+                                    if (cnt % ratio == 0) {
+                                        currentMap.put(e.x, offset);
+                                    }
+                                }
+                                offset += Utils.UTF8Length(t);
+                            }
+                            currentMap.put(Long.MIN_VALUE, 0L);
+                            currentMap.put(Long.MAX_VALUE, offset);
+                            synchronized (res) {
+                                res.put(orderedFilename, currentMap);
+                            }
+                            bw.close();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            ths[t].start();
+        }
+        for (int i = 0; i < threadNum; ++i) {
+            ths[i].join();
+        }
+        return res;
+    }
     private void SortOffsetParallel() {
 
         try {
@@ -448,7 +516,7 @@ public class OrderSystemImpl implements OrderSystem {
 
                             long orderGoodRatio = goodEntriesCount.get() / memoryOrderGoodIndexSize;
                             if (orderGoodRatio == 0) orderGoodRatio = 1;
-                            Map<String, TreeMap<Long, Long>> t2 = SortOffset(Utils.filterByDisk(unSortedOrderGoodIndexBlockFiles, disk), Utils.filterByDisk(sortedOrderGoodIndexBlockFiles, disk), orderGoodRatio);
+                            Map<String, TreeMap<Long, Long>> t2 = SortGoodRawOffset(Utils.filterByDisk(unSortedOrderGoodIndexBlockFiles, disk), Utils.filterByDisk(sortedOrderGoodIndexBlockFiles, disk), orderGoodRatio);
                             synchronized (orderGoodIndexOffset) {
                                 orderGoodIndexOffset.putAll(t2);
                             }
@@ -676,6 +744,32 @@ public class OrderSystemImpl implements OrderSystem {
         return null;
     }
 
+    private List<String> QueryEntryByGoodId(long id, long blockNum, Map<String, TreeMap<Long, Long>> indexOffset, List<String> sortedIndexBlockFiles, Map<Integer, String> fileIdMapperRev) {
+        int blockId = (int)(id % blockNum);
+        TreeMap<Long, Long> blockIndex = indexOffset.get(sortedIndexBlockFiles.get(blockId));
+        long offset = blockIndex.floorEntry(id).getValue();
+        int len = (int)(blockIndex.higherEntry(id).getValue() - offset);
+
+        byte[] buf = new byte[len];
+        //FileChannel fc = FileChannel.open(Paths.get(sortedIndexBlockFiles.get(blockId)));
+        BigMappedByteBuffer fc = mbbMap.get(sortedIndexBlockFiles.get(blockId)).slice();
+        fc.position((int)offset);
+        fc.get(buf);
+        String[] lines = new String(buf, StandardCharsets.UTF_8).split("\n");
+
+        List<String> ans = new ArrayList<>();
+        for (String line : lines) {
+            String goodId = Utils.GetAttribute(line, "goodid");
+            long goodIdHash = Utils.hash(goodId);
+            if (goodIdHash == id) {
+                ans.add(line);
+            }
+        }
+
+        return ans;
+    }
+
+
     private List<String> QueryOrderByBuyer(long buyerHashVal, long from, long to, Map<String, TreeMap<Tuple<Long, Long>, Long>> indexOffset, List<String> sortedIndexBlockFiles) {
         Tuple<Long, Long> buyerIndexEntryLowerBound = new Tuple<>(buyerHashVal, from);
         Tuple<Long, Long> buyerIndexEntryUpperBound = new Tuple<>(buyerHashVal, to);
@@ -900,7 +994,7 @@ public class OrderSystemImpl implements OrderSystem {
                 }
             }
         }
-        List<String> ans = QueryEntryById(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, fileIdMapperRev);
+        List<String> ans = QueryEntryByGoodId(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, fileIdMapperRev);
         Set<String> attrs = null;
         if (keys == null) {
             keys = attrToTable.keySet();
