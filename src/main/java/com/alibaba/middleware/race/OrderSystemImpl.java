@@ -128,7 +128,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     private long ExtractGoodOffset(List<String> goodFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
-        int threadNumber = 16;
+        int threadNumber = 4;
         Thread ths[] = new Thread[threadNumber];
         List<List<String>> threadFiles = Utils.SplitFiles(goodFiles, threadNumber);
 
@@ -180,7 +180,7 @@ public class OrderSystemImpl implements OrderSystem {
     }
     private long ExtractBuyerOffset(List<String> buyerFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
-        int threadNumber = 16;
+        int threadNumber = 4;
         Thread ths[] = new Thread[threadNumber];
         List<List<String>> threadFiles = Utils.SplitFiles(buyerFiles, threadNumber);
 
@@ -237,7 +237,7 @@ public class OrderSystemImpl implements OrderSystem {
     private long ExtractOrderOffset(List<String> orderFiles) throws IOException, KeyException, InterruptedException {
         final AtomicLong total = new AtomicLong(0L);
 
-        int threadNumber = 16;
+        int threadNumber = 4;
         final List<List<String>> threadFiles = Utils.SplitFiles(orderFiles, threadNumber);
         Thread ths[] = new Thread[threadNumber];
         for (int i = 0; i < threadNumber; ++i) {
@@ -300,7 +300,7 @@ public class OrderSystemImpl implements OrderSystem {
     }
     private Map<String, TreeMap<Long, Long>> SortOffset(final List<String> unOrderedFiles, final List<String> orderedFiles, final long ratio) throws IOException, KeyException, InterruptedException {
         final Map<String, TreeMap<Long, Long>> res = new HashMap<>();
-        final int threadNum = 3;
+        final int threadNum = 2;
         Thread[] ths = new Thread[threadNum];
         for (int t = 0; t < threadNum; ++t) {
             final int tid = t;
@@ -368,7 +368,7 @@ public class OrderSystemImpl implements OrderSystem {
     }
     private Map<String, TreeMap<Tuple<Long, Long>, Long>> SortBuyerOffset(final List<String> unOrderedFiles, final List<String> orderedFiles, final long ratio) throws IOException, KeyException, InterruptedException {
         final Map<String, TreeMap<Tuple<Long, Long>, Long>> res = new HashMap<>();
-        final int threadNum = 3;
+        final int threadNum = 2;
         Thread[] ths = new Thread[threadNum];
         for (int t = 0; t < threadNum; ++t) {
             final int tid = t;
