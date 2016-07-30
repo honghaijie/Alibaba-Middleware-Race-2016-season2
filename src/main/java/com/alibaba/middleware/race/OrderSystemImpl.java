@@ -36,7 +36,8 @@ public class OrderSystemImpl implements OrderSystem {
     private SimpleCache rawDataCache = new SimpleCache(49999);
 
 
-    static final int orderBlockNum = 1000;
+    static final int orderBlockNum = 500;
+    static final int orderGoodBlockNum = 1500;
     static final int buyerBlockNum = 50;
     static final int goodBlockNum = 50;
     static final int bufferSize = 256 * 1024;
@@ -270,7 +271,7 @@ public class OrderSystemImpl implements OrderSystem {
 
 
                         long goodHashVal = Utils.hash(goodid);
-                        int goodBlockId = (int) ((goodHashVal) % orderBlockNum);
+                        int goodBlockId = (int) ((goodHashVal) % orderGoodBlockNum);
                         String goodIndexPath = unSortedOrderGoodIndexBlockFiles.get(goodBlockId);
                         //diskWriterMap.get(Utils.GetDisk(goodIndexPath)).write(goodIndexPath, Utils.longToBytes(goodHashVal, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
                         diskWriterMap.get(Utils.GetDisk(goodIndexPath)).write(goodIndexPath, lineRawBytes);
@@ -586,7 +587,7 @@ public class OrderSystemImpl implements OrderSystem {
         }
 
 
-        for (int i = 0; i < orderBlockNum; ++i) {
+        for (int i = 0; i < orderGoodBlockNum; ++i) {
             String currentStoreFolder = storeFolders.get((diskCount++) % storeFolders.size());
             String unSortedGoodPath = currentStoreFolder + "\\og" + rd.nextInt() + "_";
             String sortedGoodPath = currentStoreFolder + "\\og" + rd.nextInt();
@@ -994,7 +995,7 @@ public class OrderSystemImpl implements OrderSystem {
                 }
             }
         }
-        List<String> ans = QueryEntryByGoodId(Utils.hash(goodid), orderBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, fileIdMapperRev);
+        List<String> ans = QueryEntryByGoodId(Utils.hash(goodid), orderGoodBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, fileIdMapperRev);
         Set<String> attrs = null;
         if (keys == null) {
             keys = attrToTable.keySet();
