@@ -81,7 +81,6 @@ public class OrderSystemImpl implements OrderSystem {
     AtomicLong buyerEntriesCount = new AtomicLong(0L);
 
     public OrderSystemImpl() {
-
     }
     private List<Tuple<Long, Long>> RandomOrder(List<String> orderFiles, int size) {
         Random rd = new Random(123);
@@ -263,7 +262,6 @@ public class OrderSystemImpl implements OrderSystem {
                         String goodid = attr.get("goodid");
                         String buyerid = attr.get("buyerid");
                         long createtime = Long.parseLong(attr.get("createtime"));
-
 
                         int orderBlockId = (int) (orderId % orderBlockNum);
                         String orderIndexPath = unSortedOrderOrderIndexBlockFiles.get(orderBlockId);
