@@ -146,16 +146,63 @@ public class Utils {
         return null;
     }
 
-    public static List<Tuple<String, String>> ParseEntryStrToList(String s) {
-        String[] fields = s.split("\\t");
-        List<Tuple<String, String>> ans = new ArrayList<Tuple<String, String>>();
-        for (String kvString : fields) {
-            String[] splitedKeyValuePair = kvString.split(":");
-            String key = splitedKeyValuePair[0];
-            String value = splitedKeyValuePair[1];
-            ans.add(new Tuple<String, String>(key, value));
+    public static int GetAttribute(char[] s, int from, int to, String qkey, char[] keyBuf, char[] res) {
+        int keyCnt = 0;
+        int i = from;
+        int resLength = 0;
+        while (i < to) {
+            if (s[i] == ':') {
+                resLength = 0;
+                for(;;) {
+                    ++i;
+                    if (i == to || s[i] == '\t') {
+                        boolean match = true;
+                        if (qkey.length() == keyCnt) {
+                            for (int k = 0; k < keyCnt; ++k) {
+                                if (keyBuf[k] != qkey.charAt(k)) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+                        } else {
+                            match = false;
+                        }
+                        if (match) {
+                            return resLength;
+                        } else {
+                            ++i;
+                            keyCnt = 0;
+                            break;
+                        }
+                    }
+                    res[resLength++] = s[i];
+                }
+            }else {
+                keyBuf[keyCnt++] = s[i++];
+            }
         }
-        return ans;
+        return -1;
+    }
+
+    public static void ScanAttribute(char[] s, int from, int to, char[] keyBuf, int[] arr, int type) {
+        int keyCnt = 0;
+        int i = from;
+        while (i < to) {
+            if (s[i] == ':') {
+                for(;;) {
+                    ++i;
+                    if (i == to || s[i] == '\t') {
+                        arr[(int)(Utils.hash(keyBuf, 0, keyCnt) % arr.length)] = type;
+                        ++i;
+                        keyCnt = 0;
+                        break;
+
+                    }
+                }
+            }else {
+                keyBuf[keyCnt++] = s[i++];
+            }
+        }
     }
 
     public static String GetDisk(String path) {
@@ -206,6 +253,15 @@ public class Utils {
         h = Math.abs(h);
         return h;
     }
+    public static long hash(char[] s, int from, int to) {
+        long h = 1125899906842597L; // prime
+
+        for (int i = from; i < to; i++) {
+            h = 31*h + s[i];
+        }
+        h = Math.abs(h);
+        return h;
+    }
     public static long ZipFileIdAndOffset(long fileId, long offset) {
         return (fileId << 45) + offset;
     }
@@ -218,6 +274,24 @@ public class Utils {
         int count = 0;
         for (int i = 0, len = sequence.length(); i < len; i++) {
             char ch = sequence.charAt(i);
+            if (ch <= 0x7F) {
+                count++;
+            } else if (ch <= 0x7FF) {
+                count += 2;
+            } else if (Character.isHighSurrogate(ch)) {
+                count += 4;
+                ++i;
+            } else {
+                count += 3;
+            }
+        }
+        return count;
+
+    }
+    public static int UTF8Length(char[] c, int from, int to) {
+        int count = 0;
+        for (int i = from; i < to; ++i) {
+            char ch = c[i];
             if (ch <= 0x7F) {
                 count++;
             } else if (ch <= 0x7FF) {
@@ -273,5 +347,18 @@ public class Utils {
             lengths.set(pos, lengths.get(pos) + len);
         }
         return ans;
+    }
+    public static long ParseLong(char[] s, int from, int to) {
+        long ans = 0;
+        boolean neg = false;
+        if (s[from] == '+') ++from;
+        if (s[from] == '-') {
+            ++from;
+            neg = true;
+        }
+        for (;from < to; ++from) {
+            ans = ans * 10 + s[from] - '0';
+        }
+        return neg ? -ans : ans;
     }
 }

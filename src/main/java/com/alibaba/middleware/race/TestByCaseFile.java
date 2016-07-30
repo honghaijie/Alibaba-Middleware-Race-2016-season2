@@ -71,7 +71,7 @@ public class TestByCaseFile {
             BufferedReader br = new BufferedReader(new InputStreamReader(fis, StandardCharsets.UTF_8));
             while (true) {
                 ++cnt;
-                if (cnt == 227579) {
+                if (cnt == 4) {
                     int a = 1;
                 }
                 String cs = br.readLine();

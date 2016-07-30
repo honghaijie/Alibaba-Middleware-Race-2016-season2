@@ -26,7 +26,6 @@ public class OrderSystemImpl implements OrderSystem {
     private Object constructFinishNotifier = new Object();
     private boolean constructFinish = false;
 
-    private Map<String, DiskBytesWriter> diskWriterMap = new HashMap<>();
 
     private Map<String, Integer> fileIdMapper = new TreeMap<String, Integer>();
     private Map<Integer, String> fileIdMapperRev = new TreeMap<Integer, String>();
@@ -55,6 +54,9 @@ public class OrderSystemImpl implements OrderSystem {
     List<String> unSortedOrderBuyerIndexBlockFiles = new ArrayList<String>();
     List<String> sortedOrderBuyerIndexBlockFiles = new ArrayList<String>();
 
+    Map<String, BufferedOutputStream> orderOrderIndexBlockFilesOutputStreamMapper = new HashMap<String, BufferedOutputStream>();
+    Map<String, BufferedWriter> orderGoodIndexBlockFilesOutputStreamMapper = new HashMap<String, BufferedWriter>();
+    Map<String, BufferedOutputStream> orderBuyerIndexBlockFilesOutputStreamMapper = new HashMap<String, BufferedOutputStream>();
 
     Map<String, TreeMap<Long, Long>> orderOrderIndexOffset = new HashMap<String, TreeMap<Long, Long>>();
     Map<String, TreeMap<Long, Long>> orderGoodIndexOffset = new HashMap<String, TreeMap<Long, Long>>();
@@ -74,7 +76,7 @@ public class OrderSystemImpl implements OrderSystem {
 
     TreeMap<Tuple<Long, Long>, Integer> buyerBlockMapper = new TreeMap<>();
 
-    Map<String, String> attrToTable = new HashMap<>(10000);
+    int[] attrToTable = new int[100000];
     AtomicLong orderEntriesCount = new AtomicLong(0L);
 
     //WARNING
@@ -145,10 +147,10 @@ public class OrderSystemImpl implements OrderSystem {
                         String filename = tp.filename;
                         long offset = tp.offset;
                         Map<String, String> attr = Utils.ParseEntryStrToMap(line);
-                        String goodid = attr.get("goodid");
                         for (Map.Entry<String, String> t : attr.entrySet()) {
-                            threadAttrTable.put(t.getKey(), Config.GoodTable);
+                            attrToTable[(int)(Utils.hash(t.getKey()) % attrToTable.length)] = Config.GoodTable;
                         }
+                        String goodid = attr.get("goodid");
                         long goodIdHashVal = Utils.hash(goodid);
 
                         int goodBlockId = (int) (goodIdHashVal % goodBlockNum);
@@ -166,9 +168,6 @@ public class OrderSystemImpl implements OrderSystem {
                         ++threadTotal;
                     }
                     total.addAndGet(threadTotal);
-                    synchronized (attrToTable) {
-                        attrToTable.putAll(threadAttrTable);
-                    }
                 }
             };
             ths[i].start();
@@ -188,7 +187,6 @@ public class OrderSystemImpl implements OrderSystem {
             final DiskStringReader reader = new DiskStringReader(threadFiles.get(i));
             ths[i] = new Thread() {
                 public void run() {
-                    Map<String, String> threadAttrTable = new HashMap<>();
                     long threadTotal = 0L;
                     String filename = null;
                     while (true) {
@@ -199,8 +197,9 @@ public class OrderSystemImpl implements OrderSystem {
                         filename = tp.filename;
                         long offset = tp.offset;
                         Map<String, String> attr = Utils.ParseEntryStrToMap(line);
+
                         for (Map.Entry<String, String> t : attr.entrySet()) {
-                            threadAttrTable.put(t.getKey(), Config.BuyerTable);
+                            attrToTable[(int)(Utils.hash(t.getKey()) % attrToTable.length)] = Config.BuyerTable;
                         }
                         String buyerid = attr.get("buyerid");
                         long buyerIdHashVal = Utils.hash(buyerid);
@@ -220,9 +219,6 @@ public class OrderSystemImpl implements OrderSystem {
                         ++threadTotal;
                     }
                     total.addAndGet(threadTotal);
-                    synchronized (attrToTable) {
-                        attrToTable.putAll(threadAttrTable);
-                    }
                 }
             };
             ths[i].start();
@@ -241,54 +237,95 @@ public class OrderSystemImpl implements OrderSystem {
         final List<List<String>> threadFiles = Utils.SplitFiles(orderFiles, threadNumber);
         Thread ths[] = new Thread[threadNumber];
         for (int i = 0; i < threadNumber; ++i) {
-            final DiskStringReader reader = new DiskStringReader(threadFiles.get(i));
+            final List<String> readFiles = threadFiles.get(i);
             ths[i] = new Thread() {
                 public void run() {
-                    String line;
-                    String filename = null;
-                    long threadTotal = 0;
-                    Map<String, String> threadAttrTable = new HashMap<>();
-                    while (true) {
-                        DiskStringReader.ReadEntry tp = reader.readLineAndFileName();
-                        if (tp == null) break;
+                    try {
+                        long offset = 0;
+                        char[] buf = new char[2000], tbuf = new char[200];
+                        char[] orderBuf = new char[200], goodBuf = new char[200], buyerBuf = new char[200], timeBuf = new char[200];
+                        int orderBufCnt = 0, goodBufCnt = 0, buyerBufCnt = 0, timeBufCnt = 0;
+                        long threadTotal = 0;
+                        Map<String, String> threadAttrTable = new HashMap<>();
 
-                        line = tp.content;
-                        filename = tp.filename;
-                        long offset = tp.offset;
-                        byte[] lineRawBytes = (line + "\n").getBytes(StandardCharsets.UTF_8);
-                        Map<String, String> attr = Utils.ParseEntryStrToMap(line);
-                        for (Map.Entry<String, String> t : attr.entrySet()) {
-                            threadAttrTable.put(t.getKey(), Config.OrderTable);
+                        for (int j = 0; j < readFiles.size(); ++j) {
+                            String filename = readFiles.get(j);
+                            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
+                            int bufCnt = 0;
+                            char c;
+
+                            while (true) {
+                                bufCnt = 0;
+                                int it = 0;
+                                while (true) {
+                                    it = reader.read();
+                                    if (it == -1) break;
+                                    c = (char)it;
+                                    if (c == '\n') break;
+                                    buf[bufCnt++] = c;
+                                }
+                                if (it == -1) break;
+
+                                orderBufCnt = Utils.GetAttribute(buf, 0, bufCnt, "orderid", tbuf, orderBuf);
+                                long orderId = Utils.ParseLong(orderBuf, 0, orderBufCnt);
+
+                                goodBufCnt = Utils.GetAttribute(buf, 0, bufCnt, "goodid", tbuf, goodBuf);
+                                long goodHashVal = Utils.hash(goodBuf, 0, goodBufCnt);
+
+                                buyerBufCnt = Utils.GetAttribute(buf, 0, bufCnt, "buyerid", tbuf, buyerBuf);
+                                long buyerHashVal = Utils.hash(buyerBuf, 0, buyerBufCnt);
+
+                                timeBufCnt = Utils.GetAttribute(buf, 0, bufCnt, "createtime", tbuf, timeBuf);
+                                long createtime = Utils.ParseLong(timeBuf, 0, timeBufCnt);
+
+                                int orderBlockId = (int) (orderId % orderBlockNum);
+                                String orderIndexPath = unSortedOrderOrderIndexBlockFiles.get(orderBlockId);
+                                BufferedOutputStream bos = orderOrderIndexBlockFilesOutputStreamMapper.get(orderIndexPath);
+                                synchronized (bos) {
+                                    try {
+                                        bos.write(Utils.longToBytes(orderId));
+                                        bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+
+                                int goodBlockId = (int) ((goodHashVal) % orderGoodBlockNum);
+                                String goodIndexPath = unSortedOrderGoodIndexBlockFiles.get(goodBlockId);
+                                //diskWriterMap.get(Utils.GetDisk(goodIndexPath)).write(goodIndexPath, Utils.longToBytes(goodHashVal, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
+                                BufferedWriter bw = orderGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath);
+                                synchronized (bos) {
+                                    try {
+                                        buf[bufCnt] = '\n';
+                                        bw.write(buf,0, bufCnt + 1);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+
+                                Tuple<Long, Long> buyerIndexEntry = new Tuple<>(buyerHashVal, createtime);
+                                int buyerBlockId = buyerBlockMapper.floorEntry(buyerIndexEntry).getValue();
+                                String buyerIndexPath = unSortedOrderBuyerIndexBlockFiles.get(buyerBlockId);
+                                bos = orderBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath);
+                                synchronized (bos) {
+                                    try {
+                                        bos.write(Utils.longToBytes(buyerHashVal, createtime, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                ++threadTotal;
+
+                                offset += Utils.UTF8Length(buf, 0, bufCnt) + 1;
+                            }
                         }
-                        long orderId = Long.parseLong(attr.get("orderid"));
-                        String goodid = attr.get("goodid");
-                        String buyerid = attr.get("buyerid");
-                        long createtime = Long.parseLong(attr.get("createtime"));
-
-                        int orderBlockId = (int) (orderId % orderBlockNum);
-                        String orderIndexPath = unSortedOrderOrderIndexBlockFiles.get(orderBlockId);
-                        diskWriterMap.get(Utils.GetDisk(orderIndexPath)).write(orderIndexPath, Utils.longToBytes(orderId, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
-
-
-                        long goodHashVal = Utils.hash(goodid);
-                        int goodBlockId = (int) ((goodHashVal) % orderGoodBlockNum);
-                        String goodIndexPath = unSortedOrderGoodIndexBlockFiles.get(goodBlockId);
-                        //diskWriterMap.get(Utils.GetDisk(goodIndexPath)).write(goodIndexPath, Utils.longToBytes(goodHashVal, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
-                        diskWriterMap.get(Utils.GetDisk(goodIndexPath)).write(goodIndexPath, lineRawBytes);
-
-                        long buyerHashVal = Utils.hash(buyerid);
-                        Tuple<Long, Long> buyerIndexEntry = new Tuple<>(buyerHashVal, createtime);
-                        int buyerBlockId = buyerBlockMapper.floorEntry(buyerIndexEntry).getValue();
-                        String buyerIndexPath = unSortedOrderBuyerIndexBlockFiles.get(buyerBlockId);
-                        diskWriterMap.get(Utils.GetDisk(buyerIndexPath)).write(buyerIndexPath, Utils.longToBytes(buyerHashVal, createtime, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
-
-                        ++threadTotal;
-
+                        total.addAndGet(threadTotal);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                    total.addAndGet(threadTotal);
-                    synchronized (attrToTable) {
-                        attrToTable.putAll(threadAttrTable);
-                    }
+
                 }
             };
             ths[i].start();
@@ -584,6 +621,7 @@ public class OrderSystemImpl implements OrderSystem {
             String sortedOrderPath = currentStoreFolder + "\\oo" + rd.nextInt();
             unSortedOrderOrderIndexBlockFiles.add(unSortedOrderPath);
             sortedOrderOrderIndexBlockFiles.add(sortedOrderPath);
+            orderOrderIndexBlockFilesOutputStreamMapper.put(unSortedOrderPath, new BufferedOutputStream(new FileOutputStream(unSortedOrderPath), bufferSize));
         }
 
 
@@ -593,6 +631,7 @@ public class OrderSystemImpl implements OrderSystem {
             String sortedGoodPath = currentStoreFolder + "\\og" + rd.nextInt();
             unSortedOrderGoodIndexBlockFiles.add(unSortedGoodPath);
             sortedOrderGoodIndexBlockFiles.add(sortedGoodPath);
+            orderGoodIndexBlockFilesOutputStreamMapper.put(unSortedGoodPath, new BufferedWriter(new OutputStreamWriter(new FileOutputStream(unSortedGoodPath),"UTF-8"), bufferSize));
         }
 
         buyerBlockMapper.put(new Tuple<Long, Long>(-1L, -1L), 0);
@@ -605,6 +644,7 @@ public class OrderSystemImpl implements OrderSystem {
             String sortedBuyerPath = currentStoreFolder + "\\ob" + rd.nextInt();
             unSortedOrderBuyerIndexBlockFiles.add(unSortedBuyerPath);
             sortedOrderBuyerIndexBlockFiles.add(sortedBuyerPath);
+            orderBuyerIndexBlockFilesOutputStreamMapper.put(unSortedBuyerPath, new BufferedOutputStream(new FileOutputStream(unSortedBuyerPath), bufferSize));
         }
 
         for (int i = 0; i < buyerBlockNum; ++i) {
@@ -627,11 +667,7 @@ public class OrderSystemImpl implements OrderSystem {
         allUnsortedOrderIndexFiles.addAll(unSortedOrderOrderIndexBlockFiles);
         allUnsortedOrderIndexFiles.addAll(unSortedOrderGoodIndexBlockFiles);
         allUnsortedOrderIndexFiles.addAll(unSortedOrderBuyerIndexBlockFiles);
-        List<List<String>> allUnsortedOrderIndexFilesGroupByDisk = Utils.GroupByDisk(allUnsortedOrderIndexFiles);
-        for (List<String> ls : allUnsortedOrderIndexFilesGroupByDisk) {
-            String diskTag = Utils.GetDisk(ls.get(0));
-            diskWriterMap.put(diskTag, new DiskBytesWriter(ls));
-        }
+
 
         final List<List<String>> orderFilesGroupByDisk = Utils.GroupByDisk(orderFiles);
         final List<List<String>> goodFilesGroupByDisk = Utils.GroupByDisk(goodFiles);
@@ -661,8 +697,14 @@ public class OrderSystemImpl implements OrderSystem {
             t1[i].join();
         }
 
-        for (DiskBytesWriter dbw : diskWriterMap.values()) {
-            dbw.close();
+        for (BufferedOutputStream s : orderOrderIndexBlockFilesOutputStreamMapper.values()) {
+            s.close();
+        }
+        for (BufferedWriter s : orderGoodIndexBlockFilesOutputStreamMapper.values()) {
+            s.close();
+        }
+        for (BufferedOutputStream s : orderBuyerIndexBlockFilesOutputStreamMapper.values()) {
+            s.close();
         }
 
         for (BufferedOutputStream s : buyerBuyerIndexBlockFilesOutputStreamMapper.values()) {
@@ -856,10 +898,6 @@ public class OrderSystemImpl implements OrderSystem {
             for (Map.Entry<String, BigMappedByteBuffer> e : mbbMap.entrySet()) {
                 System.out.printf("File name: %s, size: %d\n", e.getKey(), e.getValue().remaining());
             }
-            System.out.printf("total attributes: %d\n", attrToTable.size());
-            for (Map.Entry<String, String> e : attrToTable.entrySet()) {
-                System.out.println(e.getKey() + "\t" + e.getValue());
-            }
             System.out.printf("total construct time: %dms\n", System.currentTimeMillis() - start);
             synchronized (constructFinishNotifier) {
                 constructFinish = true;
@@ -902,45 +940,46 @@ public class OrderSystemImpl implements OrderSystem {
         }
         List<String> ans = QueryEntryById(orderId, orderBlockNum, orderOrderIndexOffset, sortedOrderOrderIndexBlockFiles, fileIdMapperRev);
         Set<String> attrs = null;
-        if (keys == null) {
-            keys = attrToTable.keySet();
-        }
-        attrs = new HashSet<>(keys);
+        if (keys != null) attrs = new HashSet<>(keys);
         if (ans.isEmpty()) return null;
         String r = ans.get(0);
         Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
 
-        for (String key : keys) {
-            if (Config.BuyerTable.equals(attrToTable.get(key)) && !key.equals("buyerid")) {
-                String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
-                orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
-                break;
+        boolean queryBuyer = false;
+        boolean queryGood = false;
+        if (keys != null) {
+            for (String key : keys) {
+                if (Config.BuyerTable == attrToTable[(int)(Utils.hash(key) % attrToTable.length)] && !key.equals("buyerid")) {
+                    queryBuyer = true;
+                    break;
+                }
             }
+            for (String key : keys) {
+                if (Config.GoodTable == attrToTable[(int) (Utils.hash(key) % attrToTable.length)] && !key.equals("goodid")) {
+                    queryGood = true;
+                    break;
+                }
+            }
+        } else {
+            queryBuyer = true;
+            queryGood = true;
         }
-
-        for (String key : keys) {
-            if (Config.GoodTable.equals(attrToTable.get(key)) && !key.equals("goodid")) {
-                String goodStr = QueryGoodByGood(orderLs.get("goodid"));
-                orderLs.putAll(Utils.ParseEntryStrToMap(goodStr));
-            }
+        if (queryBuyer) {
+            String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
+            orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
+        }
+        if (queryGood) {
+            String goodStr = QueryGoodByGood(orderLs.get("goodid"));
+            orderLs.putAll(Utils.ParseEntryStrToMap(goodStr));
         }
 
         HashMap<String, String> rt = new HashMap<>();
         for (Map.Entry<String, String> t : orderLs.entrySet()) {
-            if (t.getKey().equals("orderid") || attrs.contains(t.getKey())) {
+            if (t.getKey().equals("orderid") || attrs == null || attrs.contains(t.getKey())) {
                 rt.put(t.getKey(), t.getValue());
             }
         }
 
-        System.out.print("Ord,k:");
-        if (keys.size() == attrToTable.size()) {
-            System.out.print("null");
-        } else {
-            for (String k : keys) {
-                System.out.print(k + ",");
-            }
-        }
-        System.out.println();
         return new QueryResult(rt);
 
     }
@@ -979,7 +1018,6 @@ public class OrderSystemImpl implements OrderSystem {
                 return 0;
             }
         });
-        System.out.printf("Buy,l:%d\n", rr.size());
         return rr.iterator();
 
     }
@@ -997,60 +1035,44 @@ public class OrderSystemImpl implements OrderSystem {
         }
         List<String> ans = QueryEntryByGoodId(Utils.hash(goodid), orderGoodBlockNum, orderGoodIndexOffset, sortedOrderGoodIndexBlockFiles, fileIdMapperRev);
         Set<String> attrs = null;
-        if (keys == null) {
-            keys = attrToTable.keySet();
+        if (keys != null) {
+            attrs = new HashSet<>(keys);
         }
-        attrs = new HashSet<>(keys);
-        attrs.add("orderid");
         List<Result> rr = new ArrayList<>();
         if (ans.isEmpty()) return rr.iterator();
 
         Map<String, String> goodAttr = new HashMap<>();
         boolean loadGoodTable = false;
         boolean loadBuyerTable = false;
-        for (String key : keys) {
-            if (Config.GoodTable.equals(attrToTable.get(key)) && !key.equals("goodid")) {
-                loadGoodTable = true;
+        if (keys != null) {
+            for (String key : keys) {
+                if (Config.GoodTable == attrToTable[(int) (Utils.hash(key) % attrToTable.length)] && !key.equals("goodid")) {
+                    loadGoodTable = true;
+                }
+                if (Config.BuyerTable == attrToTable[(int) (Utils.hash(key) % attrToTable.length)] && !key.equals("buyerid")) {
+                    loadBuyerTable = true;
+                }
             }
-            if (Config.BuyerTable.equals(attrToTable.get(key)) && !key.equals("buyerid")) {
-                loadBuyerTable = true;
-            }
+        } else {
+            loadBuyerTable = true;
+            loadGoodTable = true;
         }
         if (loadGoodTable) {
             String goodStr = QueryGoodByGood(goodid);
-            Map<String, String> t = Utils.ParseEntryStrToMap(goodStr);
-            for (Map.Entry<String, String> e : t.entrySet()) {
-                if (attrs.contains(e.getKey())) {
-                    goodAttr.put(e.getKey(), e.getValue());
-                }
-            }
-        }
-        if (loadGoodTable) {
-            attrs.add("goodid");
-        }
-        if (loadBuyerTable) {
-            attrs.add("buyerid");
+            goodAttr = Utils.ParseEntryStrToMap(goodStr);
         }
         for (String r : ans) {
-            Map<String, String> orderLs = new HashMap<>();
-            for (Map.Entry<String, String> e : Utils.ParseEntryStrToMap(r).entrySet()) {
-                if (attrs.contains(e.getKey())) {
-                    orderLs.put(e.getKey(), e.getValue());
-                }
-            }
+            Map<String, String> orderLs = Utils.ParseEntryStrToMap(r);
             if (loadBuyerTable) {
                 String buyerStr = QueryBuyerByBuyer(orderLs.get("buyerid"));
-                for (Map.Entry<String, String> e : Utils.ParseEntryStrToMap(buyerStr).entrySet()) {
-                    if (attrs.contains(e.getKey())) {
-                        orderLs.put(e.getKey(), e.getValue());
-                    }
-                }
+                orderLs.putAll(Utils.ParseEntryStrToMap(buyerStr));
             }
             orderLs.putAll(goodAttr);
-
             HashMap<String, String> rt = new HashMap<>();
             for (Map.Entry<String, String> t : orderLs.entrySet()) {
-                rt.put(t.getKey(), t.getValue());
+                if (t.getKey().equals("orderid") || attrs == null || attrs.contains(t.getKey())) {
+                    rt.put(t.getKey(), t.getValue());
+                }
             }
             rr.add(new QueryResult(rt));
         }
@@ -1065,15 +1087,6 @@ public class OrderSystemImpl implements OrderSystem {
                 return 0;
             }
         });
-        System.out.printf("Good,l:%d,k:", rr.size());
-        if (keys.size() == attrToTable.size()) {
-            System.out.print("null");
-        } else {
-            for (String k : keys) {
-                System.out.print(k + ",");
-            }
-        }
-        System.out.println();
         return rr.iterator();
 
     }
