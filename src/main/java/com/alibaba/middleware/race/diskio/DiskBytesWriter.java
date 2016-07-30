@@ -17,9 +17,9 @@ public class DiskBytesWriter {
     BlockingQueue<WriteMessage<byte[]>> q[];
     Map<String, BufferedOutputStream> filenameMapper = new HashMap<>(1000);
     Thread[] ths;
-    int bufferSize = 512 * 1024;
+    int bufferSize = 256 * 1024;
     int capacity = 1000;
-    int threadNum = 2;
+    int threadNum = 4;
     public DiskBytesWriter(Collection<String> files)  {
         try {
             q = new BlockingQueue[threadNum];

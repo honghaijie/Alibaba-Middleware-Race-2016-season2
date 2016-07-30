@@ -36,7 +36,7 @@ public class OrderSystemImpl implements OrderSystem {
     private SimpleCache rawDataCache = new SimpleCache(49999);
 
 
-    static final int orderBlockNum = 500;
+    static final int orderBlockNum = 1000;
     static final int buyerBlockNum = 50;
     static final int goodBlockNum = 50;
     static final int bufferSize = 256 * 1024;
@@ -879,7 +879,7 @@ public class OrderSystemImpl implements OrderSystem {
         synchronized (constructFinishNotifier) {
             while (!constructFinish) {
                 try {
-                    constructFinishNotifier.wait(3550 * 1000);
+                    constructFinishNotifier.wait(3500 * 1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
