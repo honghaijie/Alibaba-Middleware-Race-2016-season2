@@ -348,42 +348,41 @@ public class OrderSystemImpl implements OrderSystem {
                             if (i % threadNum != tid) continue;
                             String unOrderedFilename = unOrderedFiles.get(i);
                             String orderedFilename = orderedFiles.get(i);
+
                             File file = new File(unOrderedFilename);
                             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file), bufferSize);
+                            int fileLength = (int)file.length();
+                            ByteBuffer fileBytes = ByteBuffer.allocate(fileLength);
                             int entryLength = 16;
-                            long offset = 0;
-                            //Map<Long, Tuple<Long, Long>> indexMapper = new TreeMap<Long, Tuple<Long, Long>>();
-                            List<Tuple<Long, Long>> indexList = new ArrayList<>();
-                            while (true) {
-                                byte[] entryBytes = new byte[entryLength];
-                                int len = bis.read(entryBytes);
-                                if (len == -1) break;
-                                long[] e = Utils.byteArrayToLongArray(entryBytes);
-                                indexList.add(new Tuple<Long, Long>(e[0], e[1]));
+                            byte[] sbuf = new byte[entryLength];
+                            for (int j = 0; j < fileLength; j += entryLength) {
+                                bis.read(sbuf);
+                                fileBytes.put(sbuf);
                             }
+                            fileBytes.flip();
+                            long[] longs = Utils.byteArrayToLongArray(fileBytes);
+                            Utils.QuickSort(longs, 0, longs.length - 2);
                             bis.close();
-                            Collections.sort(indexList, new Comparator<Tuple<Long, Long>>() {
-                                @Override
-                                public int compare(Tuple<Long, Long> o1, Tuple<Long, Long> o2) {
-                                    return o1.x.compareTo(o2.x);
-                                }
-                            });
+                            fileBytes.flip();
+                            fileBytes.position(0);
+                            for (long l : longs) {
+                                fileBytes.putLong(l);
+                            }
+                            fileBytes.flip();
                             TreeMap<Long, Long> currentMap = new TreeMap<>();
                             BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(orderedFilename), bufferSize);
                             int cnt = 0;
-                            for (int idx = 0; idx < indexList.size(); ++idx) {
-                                Tuple<Long, Long> e = indexList.get(idx);
-
-                                fos.write(Utils.longToBytes(e.x));
-                                fos.write(Utils.longToBytes(e.y));
-                                if (idx == 0 || !indexList.get(idx - 1).x.equals(e.x)) {
+                            long offset = 0;
+                            for (int idx = 0; idx < longs.length; idx += 2) {
+                                if (idx == 0 || longs[idx - 2] != longs[idx]) {
                                     ++cnt;
                                     if (cnt % ratio == 0) {
-                                        currentMap.put(e.x, offset);
+                                        currentMap.put(longs[idx], offset);
                                     }
                                 }
                                 offset += entryLength;
                             }
+                            fos.write(fileBytes.array());
                             currentMap.put(Long.MIN_VALUE, 0L);
                             currentMap.put(Long.MAX_VALUE, offset);
                             synchronized (res) {
@@ -915,9 +914,9 @@ public class OrderSystemImpl implements OrderSystem {
         };
         t.start();
         synchronized (constructFinishNotifier) {
-            while (!constructFinish) {
+            if (!constructFinish) {
                 try {
-                    constructFinishNotifier.wait(3400 * 1000);
+                    constructFinishNotifier.wait(3500 * 1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

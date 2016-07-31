@@ -46,6 +46,16 @@ public class Utils {
         }
         return res;
     }
+
+    public static long[] byteArrayToLongArray(ByteBuffer bf) {
+        bf.position(0);
+        long[] res = new long[bf.remaining() / 8];
+        for (int i = 0; i < res.length; ++i) {
+            res[i] = bf.getLong();
+        }
+        return res;
+    }
+
     public static byte[] convertToBytes(Object object) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutput out = null;
@@ -360,5 +370,26 @@ public class Utils {
             ans = ans * 10 + s[from] - '0';
         }
         return neg ? -ans : ans;
+    }
+    public static void QuickSort(long[] a, int l, int r) {
+        int i = l, j = r;
+        long m = a[(i / 2 + j / 2) / 2 * 2];
+        do {
+            while (m > a[i]) i += 2;
+            while (m < a[j]) j -= 2;
+            if (i <= j) {
+                long t = a[i];
+                a[i] = a[j];
+                a[j] = t;
+                t = a[i + 1];
+                a[i + 1] = a[j + 1];
+                a[j + 1] = t;
+
+                i += 2;
+                j -= 2;
+            }
+        } while (i <= j);
+        if (j > l) QuickSort(a, l, j);
+        if (i < r) QuickSort(a, i, r);
     }
 }

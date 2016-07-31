@@ -43,12 +43,16 @@ public class BigMappedByteBuffer {
         return res;
     }
     public void get(byte[] buf) {
-        int remain = buffers[currentBuffer].remaining();
-        if (remain >= buf.length) {
-            buffers[currentBuffer].get(buf);
-        } else {
-            buffers[currentBuffer++].get(buf, 0, remain);
-            buffers[currentBuffer].get(buf, remain, buf.length - remain);
+        int start = 0;
+        while (start != buf.length) {
+            int remain = buffers[currentBuffer].remaining();
+            if (remain >= buf.length - start) {
+                buffers[currentBuffer].get(buf, start, buf.length - start);
+                start = buf.length;
+            } else {
+                buffers[currentBuffer++].get(buf, start, remain);
+                start += remain;
+            }
         }
         if (!buffers[currentBuffer].hasRemaining()) {
             ++currentBuffer;
