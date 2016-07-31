@@ -89,7 +89,6 @@ public class BigMappedByteBuffer {
     public void position(long offset) {
         currentBuffer = (int)(offset / blockSize);
         int blockOffset = (int)(offset % blockSize);
-        System.out.printf("Offset: %d, total Length: %d, currentBuffer: %d, blockOffset: %d\n", offset, totalLength, currentBuffer, blockOffset);
         buffers[currentBuffer].position(blockOffset);
     }
 }

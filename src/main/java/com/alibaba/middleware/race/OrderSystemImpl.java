@@ -241,13 +241,13 @@ public class OrderSystemImpl implements OrderSystem {
             ths[i] = new Thread() {
                 public void run() {
                     try {
-                        long offset = 0;
                         char[] buf = new char[100000], tbuf = new char[1000];
                         char[] orderBuf = new char[66000], goodBuf = new char[66000], buyerBuf = new char[66000], timeBuf = new char[66000];
                         int orderBufCnt = 0, goodBufCnt = 0, buyerBufCnt = 0, timeBufCnt = 0;
                         long threadTotal = 0;
 
                         for (int j = 0; j < readFiles.size(); ++j) {
+                            long offset = 0;
                             String filename = readFiles.get(j);
                             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
                             int bufCnt = 0;
@@ -480,8 +480,8 @@ public class OrderSystemImpl implements OrderSystem {
                             if (i % threadNum != tid) continue;
                             String unOrderedFilename = unOrderedFiles.get(i);
                             String orderedFilename = orderedFiles.get(i);
-
-                            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(unOrderedFilename), "UTF-8"), bufferSize);
+                            File inputFile = new File(unOrderedFilename);
+                            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), "UTF-8"), bufferSize);
 
                             long offset = 0;
                             //Map<Long, Tuple<Long, Long>> indexMapper = new TreeMap<Long, Tuple<Long, Long>>();
@@ -765,7 +765,6 @@ public class OrderSystemImpl implements OrderSystem {
                     String rawFilename = fileIdMapperRev.get((int) fileId);
                     String line = rawDataCache.get(cacheKey);
                     if (line == null) {
-                        System.out.println(rawFilename + "\t" + cacheKey);
                         BigMappedByteBuffer rfc = mbbMap.get(rawFilename).slice();
 
                         BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, rawOffset), "UTF-8"), 64);
