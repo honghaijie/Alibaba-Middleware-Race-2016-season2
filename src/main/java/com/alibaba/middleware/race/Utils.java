@@ -273,11 +273,11 @@ public class Utils {
         return h;
     }
     public static long ZipFileIdAndOffset(long fileId, long offset) {
-        return (fileId << 45) + offset;
+        return (fileId << 42L) + offset;
     }
     public static Tuple<Long, Long> UnZipFileIdAndOffset(long m) {
-        long a = m >> 45;
-        long b = m - (a << 45);
+        long a = m >> 42L;
+        long b = m - (a << 42L);
         return new Tuple<>(a, b);
     }
     public static int UTF8Length(CharSequence sequence) {

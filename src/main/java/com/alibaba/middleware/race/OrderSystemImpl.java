@@ -716,27 +716,27 @@ public class OrderSystemImpl implements OrderSystem {
         SortOffsetParallel();
         System.out.printf("Sort complete, Time: %d\n", (System.currentTimeMillis() - start) / 1000);
         for (String path : sortedOrderOrderIndexBlockFiles) {
-            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, 1000000000L);
             mbbMap.put(path, buf);
         }
         for (String path : sortedOrderBuyerIndexBlockFiles) {
-            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, 1000000000L);
             mbbMap.put(path, buf);
         }
         for (String path : sortedOrderGoodIndexBlockFiles) {
-            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, 1000000000L);
             mbbMap.put(path, buf);
         }
         for (String path : sortedBuyerBuyerIndexBlockFiles) {
-            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, 1000000000L);
             mbbMap.put(path, buf);
         }
         for (String path : sortedGoodGoodIndexBlockFiles) {
-            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, 1000000000L);
             mbbMap.put(path, buf);
         }
         for (String path : fileIdMapper.keySet()) {
-            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, Integer.MAX_VALUE);
+            BigMappedByteBuffer buf = new BigMappedByteBuffer(path, 1000000000L);
             mbbMap.put(path, buf);
         }
     }

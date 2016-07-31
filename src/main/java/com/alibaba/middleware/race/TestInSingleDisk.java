@@ -25,8 +25,6 @@ public class TestInSingleDisk {
 
     public static void GenerateData() {
 
-
-
         for (int i = 0; i < buyerCount; ++i) {
             buyerIds.add(java.util.UUID.randomUUID().toString());
         }
@@ -76,7 +74,7 @@ public class TestInSingleDisk {
         }
     }
     public static void main(String args[]) throws IOException, InterruptedException {
-        //GenerateData();
+        GenerateData();
         System.out.println("Generate complete.");
         OrderSystemImpl impl = new OrderSystemImpl();
         long startTime = System.currentTimeMillis();
@@ -87,7 +85,7 @@ public class TestInSingleDisk {
         Random rd = new Random();
         startTime = System.currentTimeMillis();
         for (int i = 0; ; ++i) {
-            int type = rd.nextInt(3);
+            int type = rd.nextInt(1);
             if (type == 0) {
                 impl.queryOrder(rd.nextInt((int) orderCount), null);
             } else if (type == 1) {

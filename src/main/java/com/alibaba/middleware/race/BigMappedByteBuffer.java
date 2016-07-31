@@ -14,7 +14,6 @@ public class BigMappedByteBuffer {
     long totalLength;
     long blockSize;
     int currentBuffer = 0;
-    FileChannel fc;
     private BigMappedByteBuffer() {}
     public BigMappedByteBuffer(String filename, long blockSize) {
         try {
@@ -90,6 +89,7 @@ public class BigMappedByteBuffer {
     public void position(long offset) {
         currentBuffer = (int)(offset / blockSize);
         int blockOffset = (int)(offset % blockSize);
+        System.out.printf("Offset: %d, total Length: %d, currentBuffer: %d, blockOffset: %d\n", offset, totalLength, currentBuffer, blockOffset);
         buffers[currentBuffer].position(blockOffset);
     }
 }
