@@ -242,11 +242,10 @@ public class OrderSystemImpl implements OrderSystem {
                 public void run() {
                     try {
                         long offset = 0;
-                        char[] buf = new char[2000], tbuf = new char[200];
-                        char[] orderBuf = new char[200], goodBuf = new char[200], buyerBuf = new char[200], timeBuf = new char[200];
+                        char[] buf = new char[100000], tbuf = new char[1000];
+                        char[] orderBuf = new char[66000], goodBuf = new char[66000], buyerBuf = new char[66000], timeBuf = new char[66000];
                         int orderBufCnt = 0, goodBufCnt = 0, buyerBufCnt = 0, timeBufCnt = 0;
                         long threadTotal = 0;
-                        Map<String, String> threadAttrTable = new HashMap<>();
 
                         for (int j = 0; j < readFiles.size(); ++j) {
                             String filename = readFiles.get(j);
@@ -918,7 +917,7 @@ public class OrderSystemImpl implements OrderSystem {
         synchronized (constructFinishNotifier) {
             while (!constructFinish) {
                 try {
-                    constructFinishNotifier.wait(3500 * 1000);
+                    constructFinishNotifier.wait(3400 * 1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
