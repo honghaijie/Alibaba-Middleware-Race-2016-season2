@@ -765,6 +765,7 @@ public class OrderSystemImpl implements OrderSystem {
                     String rawFilename = fileIdMapperRev.get((int) fileId);
                     String line = rawDataCache.get(cacheKey);
                     if (line == null) {
+                        System.out.println(rawFilename + "\t" + cacheKey);
                         BigMappedByteBuffer rfc = mbbMap.get(rawFilename).slice();
 
                         BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteBufferBackedInputStream(rfc, rawOffset), "UTF-8"), 64);
