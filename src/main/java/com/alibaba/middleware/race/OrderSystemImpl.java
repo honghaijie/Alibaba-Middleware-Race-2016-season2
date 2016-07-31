@@ -134,40 +134,63 @@ public class OrderSystemImpl implements OrderSystem {
         Thread ths[] = new Thread[threadNumber];
         List<List<String>> threadFiles = Utils.SplitFiles(goodFiles, threadNumber);
 
+        
         for (int i = 0; i < threadNumber; ++i) {
-            final DiskStringReader reader = new DiskStringReader(threadFiles.get(i));
+            final List<String> readFiles = threadFiles.get(i);
             ths[i] = new Thread() {
                 public void run() {
-                    Map<String, String> threadAttrTable = new HashMap<>();
-                    long threadTotal = 0L;
-                    while (true) {
-                        DiskStringReader.ReadEntry tp = reader.readLineAndFileName();
-                        if (tp == null) break;
-                        String line = tp.content;
-                        String filename = tp.filename;
-                        long offset = tp.offset;
-                        Map<String, String> attr = Utils.ParseEntryStrToMap(line);
-                        for (Map.Entry<String, String> t : attr.entrySet()) {
-                            attrToTable[(int)(Utils.hash(t.getKey()) % attrToTable.length)] = Config.GoodTable;
-                        }
-                        String goodid = attr.get("goodid");
-                        long goodIdHashVal = Utils.hash(goodid);
+                    try {
+                        char[] buf = new char[100000], tbuf = new char[1000];
+                        char[] buyerBuf = new char[100000];
+                        ByteBuffer writeBuffer = ByteBuffer.allocate(128);
+                        int goodBufCnt;
+                        long threadTotal = 0;
 
-                        int goodBlockId = (int) (goodIdHashVal % goodBlockNum);
-                        String goodIndexPath = unSortedGoodGoodIndexBlockFiles.get(goodBlockId);
+                        for (int j = 0; j < readFiles.size(); ++j) {
+                            long offset = 0;
+                            String filename = readFiles.get(j);
+                            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
+                            int bufCnt = 0;
+                            char c;
 
-                        BufferedOutputStream bos = goodGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath);
-                        synchronized (bos) {
-                            try {
-                                bos.write(Utils.longToBytes(goodIdHashVal));
-                                bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                            while (true) {
+                                bufCnt = 0;
+                                int it = 0;
+                                while (true) {
+                                    it = reader.read();
+                                    if (it == -1) break;
+                                    c = (char)it;
+                                    if (c == '\n') break;
+                                    buf[bufCnt++] = c;
+                                }
+                                if (it == -1) break;
+                                Utils.ScanAttribute(buf, 0, bufCnt, tbuf, attrToTable, Config.GoodTable);
+                                goodBufCnt = Utils.GetAttribute(buf, 0, bufCnt, "goodid", tbuf, buyerBuf);
+                                long goodIdHashVal = Utils.hash(buyerBuf, 0, goodBufCnt);
+
+                                int goodBlockId = (int)(goodIdHashVal % goodBlockNum);
+                                String goodIndexPath = unSortedGoodGoodIndexBlockFiles.get(goodBlockId);
+
+                                BufferedOutputStream bos = goodGoodIndexBlockFilesOutputStreamMapper.get(goodIndexPath);
+                                synchronized (bos) {
+                                    try {
+                                        bos.write(Utils.longToBytes(goodIdHashVal));
+                                        bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                ++threadTotal;
+
+                                offset += Utils.UTF8Length(buf, 0, bufCnt) + 1;
                             }
                         }
-                        ++threadTotal;
+                        total.addAndGet(threadTotal);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    total.addAndGet(threadTotal);
+
                 }
             };
             ths[i].start();
@@ -181,48 +204,70 @@ public class OrderSystemImpl implements OrderSystem {
         final AtomicLong total = new AtomicLong(0L);
         int threadNumber = 4;
         Thread ths[] = new Thread[threadNumber];
-        List<List<String>> threadFiles = Utils.SplitFiles(buyerFiles, threadNumber);
+        final List<List<String>> threadFiles = Utils.SplitFiles(buyerFiles, threadNumber);
 
         for (int i = 0; i < threadNumber; ++i) {
-            final DiskStringReader reader = new DiskStringReader(threadFiles.get(i));
+            final List<String> readFiles = threadFiles.get(i);
             ths[i] = new Thread() {
                 public void run() {
-                    long threadTotal = 0L;
-                    String filename = null;
-                    while (true) {
-                        String line;
-                        DiskStringReader.ReadEntry tp = reader.readLineAndFileName();
-                        if (tp == null) break;
-                        line = tp.content;
-                        filename = tp.filename;
-                        long offset = tp.offset;
-                        Map<String, String> attr = Utils.ParseEntryStrToMap(line);
+                    try {
+                        char[] buf = new char[100000], tbuf = new char[1000];
+                        char[] buyerBuf = new char[100000];
+                        ByteBuffer writeBuffer = ByteBuffer.allocate(128);
+                        int buyerBufCnt;
+                        long threadTotal = 0;
 
-                        for (Map.Entry<String, String> t : attr.entrySet()) {
-                            attrToTable[(int)(Utils.hash(t.getKey()) % attrToTable.length)] = Config.BuyerTable;
-                        }
-                        String buyerid = attr.get("buyerid");
-                        long buyerIdHashVal = Utils.hash(buyerid);
+                        for (int j = 0; j < readFiles.size(); ++j) {
+                            long offset = 0;
+                            String filename = readFiles.get(j);
+                            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
+                            int bufCnt = 0;
+                            char c;
 
-                        int buyerBlockId = (int)(buyerIdHashVal % buyerBlockNum);
-                        String buyerIndexPath = unSortedBuyerBuyerIndexBlockFiles.get(buyerBlockId);
+                            while (true) {
+                                bufCnt = 0;
+                                int it = 0;
+                                while (true) {
+                                    it = reader.read();
+                                    if (it == -1) break;
+                                    c = (char)it;
+                                    if (c == '\n') break;
+                                    buf[bufCnt++] = c;
+                                }
+                                if (it == -1) break;
+                                Utils.ScanAttribute(buf, 0, bufCnt, tbuf, attrToTable, Config.BuyerTable);
+                                buyerBufCnt = Utils.GetAttribute(buf, 0, bufCnt, "buyerid", tbuf, buyerBuf);
+                                long buyerIdHashVal = Utils.hash(buyerBuf, 0, buyerBufCnt);
 
-                        BufferedOutputStream bos = buyerBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath);
-                        synchronized (bos) {
-                            try {
-                                bos.write(Utils.longToBytes(buyerIdHashVal));
-                                bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                int buyerBlockId = (int)(buyerIdHashVal % buyerBlockNum);
+                                String buyerIndexPath = unSortedBuyerBuyerIndexBlockFiles.get(buyerBlockId);
+
+                                BufferedOutputStream bos = buyerBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath);
+                                synchronized (bos) {
+                                    try {
+                                        writeBuffer.position(0);
+                                        writeBuffer.putLong(buyerIdHashVal);
+                                        writeBuffer.putLong(Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset));
+                                        bos.write(writeBuffer.array(), 0, 16);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                ++threadTotal;
+
+                                offset += Utils.UTF8Length(buf, 0, bufCnt) + 1;
                             }
                         }
-                        ++threadTotal;
+                        total.addAndGet(threadTotal);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    total.addAndGet(threadTotal);
+
                 }
             };
             ths[i].start();
-        };
+        }
         for (int i = 0; i < threadNumber; ++i) {
             ths[i].join();
         }
@@ -243,6 +288,7 @@ public class OrderSystemImpl implements OrderSystem {
                     try {
                         char[] buf = new char[100000], tbuf = new char[1000];
                         char[] orderBuf = new char[66000], goodBuf = new char[66000], buyerBuf = new char[66000], timeBuf = new char[66000];
+                        ByteBuffer writeBuffer = ByteBuffer.allocate(128);
                         int orderBufCnt = 0, goodBufCnt = 0, buyerBufCnt = 0, timeBufCnt = 0;
                         long threadTotal = 0;
 
@@ -282,8 +328,10 @@ public class OrderSystemImpl implements OrderSystem {
                                 BufferedOutputStream bos = orderOrderIndexBlockFilesOutputStreamMapper.get(orderIndexPath);
                                 synchronized (bos) {
                                     try {
-                                        bos.write(Utils.longToBytes(orderId));
-                                        bos.write(Utils.longToBytes(Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
+                                        writeBuffer.position(0);
+                                        writeBuffer.putLong(orderId);
+                                        writeBuffer.putLong(Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset));
+                                        bos.write(writeBuffer.array(), 0, 16);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -310,7 +358,11 @@ public class OrderSystemImpl implements OrderSystem {
                                 bos = orderBuyerIndexBlockFilesOutputStreamMapper.get(buyerIndexPath);
                                 synchronized (bos) {
                                     try {
-                                        bos.write(Utils.longToBytes(buyerHashVal, createtime, Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset)));
+                                        writeBuffer.position(0);
+                                        writeBuffer.putLong(buyerHashVal);
+                                        writeBuffer.putLong(createtime);
+                                        writeBuffer.putLong(Utils.ZipFileIdAndOffset(fileIdMapper.get(filename), offset));
+                                        bos.write(writeBuffer.array(), 0, 24);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -476,43 +528,60 @@ public class OrderSystemImpl implements OrderSystem {
             ths[t] = new Thread(){
                 public void run() {
                     try {
+                        int maxLineCnt = 5000000;
+                        int[] from = new int[maxLineCnt];
+                        int[] to = new int[maxLineCnt];
+                        long[] goodIdHashes = new long[maxLineCnt];
+                        char[] fileChars = new char[68000000];
+                        char[] keyBuf = new char[100000];
+                        char[] valueBuf = new char[100000];
+
                         for (int i = 0; i < unOrderedFiles.size(); ++i) {
                             if (i % threadNum != tid) continue;
                             String unOrderedFilename = unOrderedFiles.get(i);
                             String orderedFilename = orderedFiles.get(i);
+
                             File inputFile = new File(unOrderedFilename);
                             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), "UTF-8"), bufferSize);
 
-                            long offset = 0;
-                            //Map<Long, Tuple<Long, Long>> indexMapper = new TreeMap<Long, Tuple<Long, Long>>();
-                            List<Tuple<Long, String>> indexList = new ArrayList<>();
-                            while (true) {
-                                String line = br.readLine();
-                                if (line == null) break;
-                                long goodIdHash = Utils.hash(Utils.GetAttribute(line, "goodid"));
-                                indexList.add(new Tuple<Long, String>(goodIdHash, line));
+                            int lineCnt = 0;
+                            int totChars = br.read(fileChars, 0, fileChars.length);
+                            if (totChars == fileChars.length) {
+                                System.out.println("WARNING: buffer overflow!!!!!!!!!!!!!!");
+                            }
+                            from[0] = 0;
+                            for (int j = 0; j < totChars; ++j) {
+                                if (fileChars[j] == '\n') {
+                                    to[lineCnt++] = j++;
+                                    from[lineCnt] = j;
+                                }
+                            }
+                            for (int j = 0; j < lineCnt; ++j) {
+                                int vlen = Utils.GetAttribute(fileChars, from[j], to[j], "goodid", keyBuf, valueBuf);
+                                goodIdHashes[j] = Utils.hash(valueBuf, 0, vlen);
                             }
                             br.close();
-                            Collections.sort(indexList, new Comparator<Tuple<Long, String>>() {
-                                @Override
-                                public int compare(Tuple<Long, String> o1, Tuple<Long, String> o2) {
-                                    return o1.x.compareTo(o2.x);
-                                }
-                            });
+                            if (lineCnt > 1) {
+                                Utils.QuickSort(goodIdHashes, from, to, 0, lineCnt - 1);
+                            }
+
+                            long offset = 0;
+
                             TreeMap<Long, Long> currentMap = new TreeMap<>();
                             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(orderedFilename), "UTF-8"), bufferSize);
                             int cnt = 0;
-                            for (int idx = 0; idx < indexList.size(); ++idx) {
-                                Tuple<Long, String> e = indexList.get(idx);
-                                String t = e.y + "\n";
-                                bw.write(t);
-                                if (idx == 0 || !indexList.get(idx - 1).x.equals(e.x)) {
+                            long lastHash = -1;
+                            for (int idx = 0; idx < lineCnt; ++idx) {
+                                int woff = from[idx], wlen = to[idx] - from[idx] + 1;
+                                bw.write(fileChars, woff, wlen);
+                                if (idx == 0 || lastHash != goodIdHashes[idx]) {
                                     ++cnt;
                                     if (cnt % ratio == 0) {
-                                        currentMap.put(e.x, offset);
+                                        currentMap.put(goodIdHashes[idx], offset);
                                     }
                                 }
-                                offset += Utils.UTF8Length(t);
+                                lastHash = goodIdHashes[idx];
+                                offset += Utils.UTF8Length(fileChars, from[idx], to[idx] + 1);
                             }
                             currentMap.put(Long.MIN_VALUE, 0L);
                             currentMap.put(Long.MAX_VALUE, offset);

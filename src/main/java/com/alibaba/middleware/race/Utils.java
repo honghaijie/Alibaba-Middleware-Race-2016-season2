@@ -392,4 +392,31 @@ public class Utils {
         if (j > l) QuickSort(a, l, j);
         if (i < r) QuickSort(a, i, r);
     }
+    public static void QuickSort(long[] hash, int[] from, int[] to, int l, int r) {
+        int i = l, j = r;
+        long m = hash[(i + j) / 2];
+        do {
+            while (m > hash[i]) i++;
+            while (m < hash[j]) j--;
+
+            if (i <= j) {
+                long t = hash[i];
+                hash[i] = hash[j];
+                hash[j] = t;
+
+                int it = from[i];
+                from[i] = from[j];
+                from[j] = it;
+
+                it = to[i];
+                to[i] = to[j];
+                to[j] = it;
+
+                ++i;
+                --j;
+            }
+        } while (i <= j);
+        if (j > l) QuickSort(hash, from, to, l, j);
+        if (i < r) QuickSort(hash, from, to, i, r);
+    }
 }
