@@ -1,3 +1,6 @@
+https://tianchi.shuju.aliyun.com/programming/introduction.htm?raceId=231533 Rank3
+
+
 # 程序目标
 
 你的coding目标是实现一个继承自OrderSystem接口的OrderSystemImpl类。
